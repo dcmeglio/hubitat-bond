@@ -1,0 +1,501 @@
+/**
+ *  BOND Home Integration
+ *
+ *  Copyright 2019 Dominick Meglio
+ *
+ */
+
+definition(
+    name: "BOND Home Integration",
+    namespace: "dcm.bond",
+    author: "Dominick Meglio",
+    description: "Connects to BOND Home hub",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
+    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+
+
+preferences {
+	page(name: "prefHub", title: "BOND")
+	page(name: "prefListDevices", title: "BOND")
+	page(name: "prefPowerSensors", title: "BOND")
+}
+
+def prefHub() {
+	return dynamicPage(name: "prefHub", title: "Connect to BOND", nextPage:"prefListDevices", uninstall:false, install: false) {
+		section("Hub Information"){
+			input("hubIp", "text", title: "BOND Hub IP", description: "BOND Hub IP Address")
+			input("hubToken", "text", title: "BOND Hub Token", description: "BOND Hub Token")
+            input("debugOutput", "bool", title: "Enable debug logging?", defaultValue: true, displayDuringSetup: false, required: false)
+		}
+	}
+}
+
+def prefListDevices() {
+	getDevices();
+	
+	return dynamicPage(name: "prefListDevices", title: "Devices", nextPage: "prefPowerSensors", install: false, uninstall: false) {
+		section("Devices") {
+			if (state.fireplaceList.size() > 0)
+				input(name: "fireplaces", type: "enum", title: "Fireplaces", required:false, multiple:true, options:[state.fireplaceList], hideWhenEmpty: true)
+			if (state.fanList.size() > 0)
+				input(name: "fans", type: "enum", title: "Fans", required:false, multiple:true, options:[state.fanList], hideWhenEmpty: true)
+		}
+	}
+}
+
+def prefPowerSensors() {
+	return dynamicPage(name: "prefPowerSensors", title: "Fireplace Power Meters", install: true, uninstall: true, hideWhenEmpty: true) {
+		section("Fireplace Power Meters") {
+			paragraph "For each fireplace device you can associate a power meter to more accurately tell when it is powered on"
+			for (def i = 0; i < fireplaces.size(); i++) {
+				input(name: "fireplaceSensor${i}", type: "capability.powerMeter", title: "Sensor for ${state.fireplaceList[fireplaces[i]]}", required: false, submitOnChange: true)
+			}
+			for (def i = 0; i < fireplaces.size(); i++) {
+				if (this.getProperty("fireplaceSensor${i}") != null)
+				input(name: "fireplaceSensorThreshold${i}", type: "number", title: "Sensor threshold for ${state.fireplaceList[fireplaces[i]]}", required: false)
+			}
+		}
+	}
+}
+
+def installed() {
+	logDebug "Installed with settings: ${settings}"
+
+	initialize()
+}
+
+def updated() {
+	logDebug "Updated with settings: ${settings}"
+    unschedule()
+	unsubscribe()
+	initialize()
+}
+
+def initialize() {
+	logDebug "initializing"
+
+	cleanupChildDevices()
+	createChildDevices()
+	subscribeSensorEvents()	
+    schedule("0/30 * * * * ? *", updateDevices)
+}
+
+def getDevices() {
+	state.fireplaceList = [:]
+    state.fireplaceDetails = [:]
+	state.fanList = [:]
+    state.fanDetails = [:]
+	state.deviceList = [:]
+	def params = [
+		uri: "http://${hubIp}",
+		path: "/v2/devices",
+		contentType: "application/json",
+		headers: [ 'BOND-Token': hubToken ]
+	]
+	try
+	{
+		httpGet(params) { resp ->
+			for (deviceid in resp.data) {
+				if (deviceid.key == "_")
+					continue
+				getDeviceById(deviceid);
+			}
+		}
+	}
+	catch (e)
+	{
+		log.debug "HTTP Exception Received on GET: $e"
+	}
+}
+
+def getDeviceById(id) {
+	def params = [
+		uri: "http://${hubIp}",
+		path: "/v2/devices/${id}",
+		contentType: "application/json",
+		headers: [ 'BOND-Token': hubToken ]
+	]
+	try
+	{
+		httpGet(params) { resp ->
+			if (resp.data.type == "FP")
+            {
+				state.fireplaceList[id.key] = resp.data.name
+                state.fireplaceDetails[id.key] = resp.data.actions
+            }
+			else if (resp.data.type == "CF")
+            {
+				state.fanList[id.key] = resp.data.name
+                state.fanDetails[id.key] = resp.data.actions
+            }
+		}
+	}
+	catch (e)
+	{
+		log.debug "HTTP Exception Received on GET: $e"
+	}
+}
+
+def createChildDevices() {
+	if (fireplaces != null) 
+	{
+		for (fireplace in fireplaces)
+		{
+			if (!getChildDevice("bond:" + fireplace))
+            {
+				def fpDevice = addChildDevice("bond", "BOND Fireplace", "bond:" + fireplace, 1234, ["name": state.fireplaceList[fireplace], isComponent: false])
+                if (state.fireplaceDetails[fireplace].contains("TurnFpFanOn"))
+                {
+                    fpDevice.addChildDevice("bond", "BOND Fireplace Fan", "bond:" + fireplace + ":fan", ["name": state.fireplaceList[fireplace] + " Fan", isComponent: true])
+                }
+                if (state.fireplaceDetails[fireplace].contains("TurnLightOn"))
+                {
+                    fpDevice.addChildDevice("bond", "BOND Fireplace Light", "bond:" + fireplace + ":light", ["name": state.fireplaceList[fireplace] + " Light", isComponent: true])
+                }
+            }
+		}
+	}
+	
+	if (fans != null) 
+	{
+		for (fan in fans)
+		{
+			if (!getChildDevice("bond:" + fan))
+            {
+				def fanDevice = addChildDevice("bond", "BOND Fan", "bond:" + fan, 1234, ["name": state.fanList[fan], isComponent: false])
+                if (state.fanDetails[fan].contains("TurnLightOn"))
+                {
+                    fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fireplace + ":light", ["name": state.fireplaceList[fireplace] + " Light", isComponent: true])
+                }
+            }
+		}
+	}
+}
+
+def cleanupChildDevices()
+{
+	for (device in getChildDevices())
+	{
+		def deviceId = device.deviceNetworkId.replace("bond:","")
+		
+		def deviceFound = false
+		for (fireplace in fireplaces)
+		{
+			if (fireplace == deviceId)
+			{
+				deviceFound = true
+				break
+			}
+		}
+		
+		if (deviceFound == true)
+			continue
+		
+		for (fan in fans)
+		{
+			if (fan == deviceId)
+			{
+				deviceFound = true
+				break
+			}
+		}
+		if (deviceFound == true)
+			continue
+		
+		deleteChildDevice(device.deviceNetworkId)
+	}
+}
+
+def subscribeSensorEvents() {
+	for (def i = 0; i < fireplaces.size(); i++)
+	{
+		def sensorDevice = this.getProperty("fireplaceSensor${i}")
+		if (sensorDevice != null)
+		{
+			logDebug "subscribing to power event for ${sensorDevice}"
+			subscribe(sensorDevice, "power", powerMeterEventHandler)
+		}
+	}
+}
+				  
+def powerMeterEventHandler(evt) {
+	logDebug "Received power meter event ${evt}"
+	for (def i = 0; i < fireplaces.size(); i++)
+	{
+		def sensorDevice = this.getProperty("fireplaceSensor${i}")
+		if (evt.device.id == sensorDevice.id)
+		{
+			def fireplace = fireplaces[i];
+			def fireplaceDevice = getChildDevice("bond:" + fireplace)
+			def threshold = 10
+			def value = "on"
+			if (evt.integerValue < threshold)
+				value = "off"
+			if (value != fireplaceDevice.currentValue("switch"))
+			{
+				logDebug "current state ${fireplaceDevice.currentValue("switch")} changing to ${value}"
+				fireplaceDevice.sendEvent(name: "switch", value: value)
+			}
+            if (value == "off")
+            {
+                def fanDevice = fireplaceDevice.getChildDevice("bond:" + fireplace + ":fan")
+                if (fanDevice)
+                    fanDevice.sendEvent(name: "setSpeed", value: "off")
+            }
+			break;
+		}
+	}
+}
+
+def updateDevices() {
+    for (fan in fans) {
+        def state = getState(fan)
+        def device = getChildDevice("bond:" + fan)
+        def deviceLight = device.getChildDevice("bond:" + fan + ":light")
+        if (state.power > 0)
+        {
+            device.sendEvent(name: "switch", value: "on")
+        }
+        else
+        {
+            device.sendEvent(name: "switch", value: "off")
+        }
+        if (deviceLight)
+        {
+            if (state.light > 0)
+                deviceLight.sendEvent(name: "switch", value: "on")
+            else
+                deviceLight.sendEvent(name: "switch", value: "off")
+        }
+    }
+    
+    for (def i = 0; i < fireplaces.size(); i++)
+    {
+        def state = getState(fireplaces[i])
+        def device = getChildDevice("bond:" + fireplaces[i])
+        def deviceFan = device.getChildDevice("bond:" + fireplaces[i] + ":fan")
+        def deviceLight = device.getChildDevice("bond:" + fireplaces[i] + ":light")
+        
+        if (state.power > 0)
+        {
+            if (this.getProperty("fireplaceSensor${i}") == null)
+            {
+                device.sendEvent(name: "switch", value: "on")
+            }
+            if (deviceFan)
+            {
+                if (state.fpfan_speed == 1)
+                    deviceFan.sendEvent(name: "setSpeed", value: "low")
+                else if (state.fpfan_speed == 2)
+                    deviceFan.sendEvent(name: "setSpeed", value: "medium")
+                else if (state.fpfan_speed == 3)
+                    deviceFan.sendEvent(name: "setSpeed", value: "high")  
+            }
+            
+            if (deviceLight)
+            {
+                if (state.light == 1)
+                    deviceLight.sendEvent(name: "switch", value: "on")
+                else
+                    deviceLight.sendEvent(name: "switch", value: "off")
+            }
+        }
+        else 
+        {
+            if (this.getProperty("fireplaceSensor${i}") == null)
+            {
+                device.sendEvent(name: "switch", value: "off")
+            }
+            if (deviceFan)
+            {
+                deviceFan.sendEvent(name: "setSpeed", value: "off")
+            }
+            if (deviceLight)
+            {
+                deviceLight.sendEvent(name: "switch", value: "off")
+            }
+        }
+        
+    }
+}
+
+def handleOn(device, bondId) {
+	logDebug "Handling On event for ${bondId}"
+	if (hasAction(bondId, "TurnOn")) 
+	{
+		if (executeAction(bondId, "TurnOn") && shouldSendEvent(bondId))
+		{
+			device.sendEvent(name: "switch", value: "on")
+		}
+	}
+}
+
+def handleLightOn(device, bondId) {
+    logDebug "Handling Light On event for ${bondId}"
+    if (hasAction(bondId, "TurnLightOn")) 
+	{
+        if (executeAction(bondId, "TurnLightOn")) 
+		{
+			device.sendEvent(name: "switch", value: "on")
+		}
+    }
+}
+
+def handleLightOff(device, bondId) {
+    logDebug "Handling Light Off event for ${bondId}"    
+    if (hasAction(bondId, "TurnLightOff")) 
+	{
+        if (executeAction(bondId, "TurnLightOff")) 
+		{
+			device.sendEvent(name: "switch", value: "off")
+		}
+    }
+}
+
+def handleFanSpeed(device, bondId, speed) {
+    logDebug "Handling Fan Speed event for ${bondId}"   
+    
+    if (hasAction(bondId, "SetSpeed")) 
+	{
+        if (executeAction(bondId, "SetSpeed", speed)) 
+		{
+			device.sendEvent(name: "setSpeed", value: speed)
+		}
+    }
+}
+
+def handleOff(device, bondId) {
+	logDebug "Handling Off event for ${bondId}"
+
+	if (hasAction(bondId, "TurnOff")) 
+	{
+		if (executeAction(bondId, "TurnOff") && shouldSendEvent(bondId)) 
+		{
+			device.sendEvent(name: "switch", value: "off")
+		}
+	}
+}
+
+def getState(bondId) {
+	def params = [
+		uri: "http://${hubIp}",
+		path: "/v2/devices/${bondId}/state",
+		contentType: "application/json",
+		headers: [ 'BOND-Token': hubToken ]
+	]
+	def stateToReturn = null
+	try
+	{
+		httpGet(params) { resp ->
+            stateToReturn = resp.data
+		}
+	}
+	catch (e)
+	{
+		log.debug "HTTP Exception Received on GET: $e"
+	}
+	return stateToReturn
+}
+
+def hasAction(bondId, commandType) {
+	logDebug "searching for ${commandType} for ${bondId}"
+	def params = [
+		uri: "http://${hubIp}",
+		path: "/v2/devices/${bondId}/actions",
+		contentType: "application/json",
+		headers: [ 'BOND-Token': hubToken ]
+	]
+	def commandToReturn = false
+	try
+	{
+		httpGet(params) { resp ->
+			for (commandId in resp.data) {
+				if (commandId.key == "_")
+					continue
+				if (commandId.key == commandType) {
+					logDebug "found command ${commandId.key} for ${bondId}"
+					commandToReturn = true
+					break
+				}
+			}
+		}
+	}
+	catch (e)
+	{
+		log.debug "HTTP Exception Received on GET: $e"
+	}
+	return commandToReturn
+}
+
+def executeAction(bondId, action) {
+	def params = [
+		uri: "http://${hubIp}",
+		path: "/v2/devices/${bondId}/actions/${action}",
+		contentType: "application/json",
+		headers: [ 'BOND-Token': hubToken ],
+		body: "{}"
+	]
+	def isSuccessful = false
+	logDebug "calling action ${action}"
+	try
+	{
+		httpPut(params) { resp ->
+			isSuccessful = (resp.status == 204)
+		}
+	}
+	catch (e) 
+	{
+		log.debug "HTTP Exception Received on PUT: $e"
+	}
+	return isSuccessful
+}
+
+def executeAction(bondId, action, argument) {
+	def params = [
+		uri: "http://${hubIp}",
+		path: "/v2/devices/${bondId}/actions/${action}",
+		contentType: "application/json",
+		headers: [ 'BOND-Token': hubToken ],
+		body: '{"argument": "' + argument +'"}'
+	]
+	def isSuccessful = false
+	logDebug "calling action ${action}"
+	try
+	{
+		httpPut(params) { resp ->
+			isSuccessful = (resp.status == 204)
+		}
+	}
+	catch (e) 
+	{
+		log.debug "HTTP Exception Received on PUT: $e"
+	}
+	return isSuccessful
+}
+
+def shouldSendEvent(bondId) {
+	for (fan in fans) 
+	{
+		if (fan == bondId)
+			return true;
+	}
+	
+	for (def i = 0; i < fireplaces.size(); i++)
+	{
+		if (fireplaces[i] == bondId)
+		{
+			if (this.getProperty("fireplaceSensor${i}") != null)
+				return false;
+			return true;
+		}
+	}
+	return true;
+}
+
+def logDebug(msg) {
+    if (settings?.debugOutput) {
+		log.debug msg
+	}
+}

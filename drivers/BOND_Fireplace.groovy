@@ -27,7 +27,7 @@ def handleLightOff(device, id) {
     parent.handleLightOff(device, id)
 }
 
-def handleFanSpeed(device, id, speed) {
-    parent.handleFanSpeed(device, id, speed)
+def handleFPFanSpeed(device, id, speed) {
+    parent.handleFPFanSpeed(device, id, speed)
 }
     

@@ -12,6 +12,6 @@ metadata {
 }
 
 def setSpeed(speed) {
-    parent.handleFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
+    parent.handleFPFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
 }
 

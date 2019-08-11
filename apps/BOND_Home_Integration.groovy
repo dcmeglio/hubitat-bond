@@ -283,13 +283,7 @@ def updateDevices() {
         if (state.power > 0)
         {
             device.sendEvent(name: "switch", value: "on")
-			
-			if (state.speed == 1)
-                    device.sendEvent(name: "setSpeed", value: "low")
-                else if (state.speed == 2)
-                    device.sendEvent(name: "setSpeed", value: "medium")
-                else if (state.speed == 3)
-                    device.sendEvent(name: "setSpeed", value: "high")  
+			device.sendEvent(name: "setSpeed", value: translateBondFanSpeedToHE(state.fanProperties[fan].max_speed ?: 3, state.speed))
         }
         else
         {
@@ -320,12 +314,7 @@ def updateDevices() {
             }
             if (deviceFan)
             {
-                if (state.fpfan_speed == 1)
-                    deviceFan.sendEvent(name: "setSpeed", value: "low")
-                else if (state.fpfan_speed == 2)
-                    deviceFan.sendEvent(name: "setSpeed", value: "medium")
-                else if (state.fpfan_speed == 3)
-                    deviceFan.sendEvent(name: "setSpeed", value: "high")  
+				deviceFan.sendEvent(name: "setSpeed", value: translateBondFanSpeedToHE(state.fireplaceProperties[fireplaces[i]].max_speed ?: 3, state.fpfan_speed))
             }
             
             if (deviceLight)
@@ -388,22 +377,46 @@ def handleLightOff(device, bondId) {
     }
 }
 
-def translateFanSpeed(speed)
+def translateBondFanSpeedToHE(max_speeds, speed)
+{
+	if (!speed.isNumber())
+		return speed
+		
+	def twoSpeeds = ["low", "high"]
+	def threeSpeeds = ["low", "medium", "high"]
+	def fourSpeeds = ["low", "medium-low", "medium", "high"]
+	def fiveSpeeds = ["low", "medium-low", "medium", "medium-high", "high"]
+	
+	if (max_speeds == 2 && speed < 2)
+		return twoSpeeds[speed]
+	else if (max_speeds == 3 && speed < 3)
+		return threeSpeeds[speed]	
+	else if (max_speeds == 4 && speed < 4)
+		return fourSpeeds[speed]	
+	else if (max_speeds == 5 && speed < 5)
+		return fiveSpeeds[speed]
+		
+	return 0
+}
+
+def translateHEFanSpeedToBond(max_speeds, speed)
 {
 	if (speed.isNumber())
 		return speed.toInteger()
 		
-	switch (speed)
-	{
-		case "low":
-			return 1;
-		case "medium":
-			return 2;
-		case "high":
-			return 3;
-		default:
-			return 0;
-	}
+	def twoSpeeds = ["low", "high"]
+	def threeSpeeds = ["low", "medium", "high"]
+	def fourSpeeds = ["low", "medium-low", "medium", "high"]
+	def fiveSpeeds = ["low", "medium-low", "medium", "medium-high", "high"]
+	
+	if (max_speeds == 2)
+		return twoSpeeds.findIndexOf { it == speed }
+	else if (max_speeds == 3)
+		return threeSpeeds.findIndexOf { it == speed }
+	else if (max_speeds == 4)
+		return fourSpeeds.findIndexOf { it == speed }
+	else if (max_speeds == 5)
+		return fiveSpeeds.findIndexOf { it == speed }
 }
 
 def handleFanSpeed(device, bondId, speed) {
@@ -415,7 +428,23 @@ def handleFanSpeed(device, bondId, speed) {
 		handleOn(device, bondId)
     else if (hasAction(bondId, "SetSpeed")) 
 	{
-        if (executeAction(bondId, "SetSpeed", translateFanSpeed(speed))) 
+        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fanProperties[bondId].max_speed ?: 3, speed))) 
+		{
+			device.sendEvent(name: "setSpeed", value: speed)
+		}
+    }
+}
+
+def handleFPFanSpeed(device, bondId, speed) {
+    logDebug "Handling Fireplace Fan Speed event for ${bondId}"
+
+	if (speed == "off")	
+		handleOff(device, bondId)
+	else if (speed == "on")
+		handleOn(device, bondId)
+    else if (hasAction(bondId, "SetSpeed")) 
+	{
+        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fireplaceProperties[bondId].max_speed ?: 3, speed))) 
 		{
 			device.sendEvent(name: "setSpeed", value: speed)
 		}

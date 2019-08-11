@@ -86,8 +86,10 @@ def initialize() {
 def getDevices() {
 	state.fireplaceList = [:]
     state.fireplaceDetails = [:]
+	state.fireplaceProperties = [:]
 	state.fanList = [:]
     state.fanDetails = [:]
+	state.fanProperties = [:]
 	state.deviceList = [:]
 	def params = [
 		uri: "http://${hubIp}",
@@ -125,11 +127,13 @@ def getDeviceById(id) {
             {
 				state.fireplaceList[id.key] = resp.data.name
                 state.fireplaceDetails[id.key] = resp.data.actions
+				state.fireplaceProperties[id.key] = getDeviceProperties(id)
             }
 			else if (resp.data.type == "CF")
             {
 				state.fanList[id.key] = resp.data.name
                 state.fanDetails[id.key] = resp.data.actions
+				state.fanProperties[id.key] = getDeviceProperties(id)
             }
 		}
 	}
@@ -137,6 +141,27 @@ def getDeviceById(id) {
 	{
 		log.debug "HTTP Exception Received on GET: $e"
 	}
+}
+
+def getDeviceProperties(id) {
+	def params = [
+		uri: "http://${hubIp}",
+		path: "/v2/devices/${id}/properties",
+		contentType: "application/json",
+		headers: [ 'BOND-Token': hubToken ]
+	]
+	def result = null
+	try
+	{
+		httpGet(params) { resp ->
+			result = resp.data
+		}
+	}
+	catch (e)
+	{
+		log.debug "HTTP Exception Received on GET: $e"
+	}
+	return result
 }
 
 def createChildDevices() {

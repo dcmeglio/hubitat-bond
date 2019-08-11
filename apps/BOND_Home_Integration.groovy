@@ -268,7 +268,7 @@ def powerMeterEventHandler(evt) {
             {
                 def fanDevice = fireplaceDevice.getChildDevice("bond:" + fireplace + ":fan")
                 if (fanDevice)
-                    fanDevice.sendEvent(name: "setSpeed", value: "off")
+                    fanDevice.sendEvent(name: "speed", value: "off")
             }
 			break;
 		}
@@ -283,12 +283,12 @@ def updateDevices() {
         if (state.power > 0)
         {
             device.sendEvent(name: "switch", value: "on")
-			device.sendEvent(name: "setSpeed", value: translateBondFanSpeedToHE(state.fanProperties[fan].max_speed ?: 3, state.speed))
+			device.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fanProperties[fan].max_speed ?: 3, state.speed))
         }
         else
         {
             device.sendEvent(name: "switch", value: "off")
-			device.sendEvent(name: "setSpeed", value: "off")
+			device.sendEvent(name: "speed", value: "off")
         }
         if (deviceLight)
         {
@@ -314,7 +314,7 @@ def updateDevices() {
             }
             if (deviceFan)
             {
-				deviceFan.sendEvent(name: "setSpeed", value: translateBondFanSpeedToHE(state.fireplaceProperties[fireplaces[i]].max_speed ?: 3, state.fpfan_speed))
+				deviceFan.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fireplaceProperties[fireplaces[i]].max_speed ?: 3, state.fpfan_speed))
             }
             
             if (deviceLight)
@@ -333,7 +333,7 @@ def updateDevices() {
             }
             if (deviceFan)
             {
-                deviceFan.sendEvent(name: "setSpeed", value: "off")
+                deviceFan.sendEvent(name: "speed", value: "off")
             }
             if (deviceLight)
             {
@@ -430,7 +430,7 @@ def handleFanSpeed(device, bondId, speed) {
 	{
         if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fanProperties[bondId].max_speed ?: 3, speed))) 
 		{
-			device.sendEvent(name: "setSpeed", value: speed)
+			device.sendEvent(name: "speed", value: speed)
 		}
     }
 }
@@ -446,7 +446,7 @@ def handleFPFanSpeed(device, bondId, speed) {
 	{
         if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fireplaceProperties[bondId].max_speed ?: 3, speed))) 
 		{
-			device.sendEvent(name: "setSpeed", value: speed)
+			device.sendEvent(name: "speed", value: speed)
 		}
     }
 }
@@ -543,7 +543,7 @@ def executeAction(bondId, action, argument) {
 		path: "/v2/devices/${bondId}/actions/${action}",
 		contentType: "application/json",
 		headers: [ 'BOND-Token': hubToken ],
-		body: '{"argument": "' + argument +'"}'
+		body: '{"argument": ' + argument +'}'
 	]
 	def isSuccessful = false
 	logDebug "calling action ${action} ${params.body}"

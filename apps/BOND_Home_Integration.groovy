@@ -34,13 +34,12 @@ def prefHub() {
 
 def prefListDevices() {
 	getDevices();
-	
 	return dynamicPage(name: "prefListDevices", title: "Devices", nextPage: "prefPowerSensors", install: false, uninstall: false) {
 		section("Devices") {
 			if (state.fireplaceList.size() > 0)
-				input(name: "fireplaces", type: "enum", title: "Fireplaces", required:false, multiple:true, options:[state.fireplaceList], hideWhenEmpty: true)
+				input(name: "fireplaces", type: "enum", title: "Fireplaces", required:false, multiple:true, options:state.fireplaceList, hideWhenEmpty: true)
 			if (state.fanList.size() > 0)
-				input(name: "fans", type: "enum", title: "Fans", required:false, multiple:true, options:[state.fanList], hideWhenEmpty: true)
+				input(name: "fans", type: "enum", title: "Fans", required:false, multiple:true, options:state.fanList, hideWhenEmpty: true)
 		}
 	}
 }
@@ -122,7 +121,6 @@ def getDeviceById(id) {
 	try
 	{
 		httpGet(params) { resp ->
-			log.debug resp.data]
 			if (resp.data.type == "FP")
             {
 				state.fireplaceList[id.key] = resp.data.name

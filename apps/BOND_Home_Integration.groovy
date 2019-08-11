@@ -462,7 +462,7 @@ def executeAction(bondId, action, argument) {
 		body: '{"argument": "' + argument +'"}'
 	]
 	def isSuccessful = false
-	logDebug "calling action ${action}"
+	logDebug "calling action ${action} ${params.body}"
 	try
 	{
 		httpPut(params) { resp ->

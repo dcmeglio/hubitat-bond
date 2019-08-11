@@ -49,12 +49,14 @@ def prefPowerSensors() {
 	return dynamicPage(name: "prefPowerSensors", title: "Fireplace Power Meters", install: true, uninstall: true, hideWhenEmpty: true) {
 		section("Fireplace Power Meters") {
 			paragraph "For each fireplace device you can associate a power meter to more accurately tell when it is powered on"
-			for (def i = 0; i < fireplaces.size(); i++) {
-				input(name: "fireplaceSensor${i}", type: "capability.powerMeter", title: "Sensor for ${state.fireplaceList[fireplaces[i]]}", required: false, submitOnChange: true)
-			}
-			for (def i = 0; i < fireplaces.size(); i++) {
-				if (this.getProperty("fireplaceSensor${i}") != null)
-				input(name: "fireplaceSensorThreshold${i}", type: "number", title: "Sensor threshold for ${state.fireplaceList[fireplaces[i]]}", required: false)
+			if (fireplaces != null) {
+				for (def i = 0; i < fireplaces.size(); i++) {
+					input(name: "fireplaceSensor${i}", type: "capability.powerMeter", title: "Sensor for ${state.fireplaceList[fireplaces[i]]}", required: false, submitOnChange: true)
+				}
+				for (def i = 0; i < fireplaces.size(); i++) {
+					if (this.getProperty("fireplaceSensor${i}") != null)
+					input(name: "fireplaceSensorThreshold${i}", type: "number", title: "Sensor threshold for ${state.fireplaceList[fireplaces[i]]}", required: false)
+				}
 			}
 		}
 	}
@@ -120,6 +122,7 @@ def getDeviceById(id) {
 	try
 	{
 		httpGet(params) { resp ->
+			log.debug resp.data]
 			if (resp.data.type == "FP")
             {
 				state.fireplaceList[id.key] = resp.data.name
@@ -167,7 +170,7 @@ def createChildDevices() {
 				def fanDevice = addChildDevice("bond", "BOND Fan", "bond:" + fan, 1234, ["name": state.fanList[fan], isComponent: false])
                 if (state.fanDetails[fan].contains("TurnLightOn"))
                 {
-                    fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fireplace + ":light", ["name": state.fireplaceList[fireplace] + " Light", isComponent: true])
+                    fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
                 }
             }
 		}

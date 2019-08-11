@@ -258,10 +258,18 @@ def updateDevices() {
         if (state.power > 0)
         {
             device.sendEvent(name: "switch", value: "on")
+			
+			if (state.speed == 1)
+                    device.sendEvent(name: "setSpeed", value: "low")
+                else if (state.speed == 2)
+                    device.sendEvent(name: "setSpeed", value: "medium")
+                else if (state.speed == 3)
+                    device.sendEvent(name: "setSpeed", value: "high")  
         }
         else
         {
             device.sendEvent(name: "switch", value: "off")
+			device.sendEvent(name: "setSpeed", value: "off")
         }
         if (deviceLight)
         {
@@ -355,12 +363,34 @@ def handleLightOff(device, bondId) {
     }
 }
 
-def handleFanSpeed(device, bondId, speed) {
-    logDebug "Handling Fan Speed event for ${bondId}"   
-    
-    if (hasAction(bondId, "SetSpeed")) 
+def translateFanSpeed(speed)
+{
+	if (speed.isNumber())
+		return speed.toInteger()
+		
+	switch (speed)
 	{
-        if (executeAction(bondId, "SetSpeed", speed)) 
+		case "low":
+			return 1;
+		case "medium":
+			return 2;
+		case "high":
+			return 3;
+		default:
+			return 0;
+	}
+}
+
+def handleFanSpeed(device, bondId, speed) {
+    logDebug "Handling Fan Speed event for ${bondId}"
+
+	if (speed == "off")	
+		handleOff(device, bondId)
+	else if (speed == "on")
+		handleOn(device, bondId)
+    else if (hasAction(bondId, "SetSpeed")) 
+	{
+        if (executeAction(bondId, "SetSpeed", translateFanSpeed(speed))) 
 		{
 			device.sendEvent(name: "setSpeed", value: speed)
 		}

@@ -1,5 +1,5 @@
 /**
- *  BOND Fireplace Fan
+ *  BOND Fan
  *
  *  Copyright 2019 Dominick Meglio
  *
@@ -14,6 +14,11 @@ metadata {
 
 def on() {
 	parent.handleOn(device, device.deviceNetworkId.split(":")[1])
+	if (state.lastSpeed != null)
+	{
+		pauseExecution(500)
+		parent.handleFanSpeed(device, device.deviceNetworkId.split(":")[1], state.lastSpeed)
+	}
 }
 
 def off() {
@@ -29,5 +34,6 @@ def handleLightOff(device, id) {
 }
 
 def setSpeed(speed) {
+	state.lastSpeed = speed
     parent.handleFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
 }

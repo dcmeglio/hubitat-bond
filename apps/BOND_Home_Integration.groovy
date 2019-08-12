@@ -382,6 +382,7 @@ def translateBondFanSpeedToHE(max_speeds, speed)
 	if (!speed.isNumber())
 		return speed
 		
+	
 	def twoSpeeds = ["low", "high"]
 	def threeSpeeds = ["low", "medium", "high"]
 	def fourSpeeds = ["low", "medium-low", "medium", "high"]
@@ -422,8 +423,11 @@ def translateHEFanSpeedToBond(max_speeds, speed)
 def handleFanSpeed(device, bondId, speed) {
     logDebug "Handling Fan Speed event for ${bondId}"
 
-	if (speed == "off")	
-		handleOff(device, bondId)
+	if (speed == "off")
+	{
+		if (handleOff(device, bondId))
+			device.sendEvent(name: "speed", value: "off")
+	}	
 	else if (speed == "on")
 		handleOn(device, bondId)
     else if (hasAction(bondId, "SetSpeed")) 
@@ -459,8 +463,10 @@ def handleOff(device, bondId) {
 		if (executeAction(bondId, "TurnOff") && shouldSendEvent(bondId)) 
 		{
 			device.sendEvent(name: "switch", value: "off")
+			return true
 		}
 	}
+	return false
 }
 
 def getState(bondId) {

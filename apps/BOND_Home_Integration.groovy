@@ -391,6 +391,8 @@ def translateBondFanSpeedToHE(max_speeds, speed)
 	if (!speed.isNumber())
 		return speed
 		
+	// So the array indices match
+	speed--
 	
 	def twoSpeeds = ["low", "high"]
 	def threeSpeeds = ["low", "medium", "high"]
@@ -420,13 +422,13 @@ def translateHEFanSpeedToBond(max_speeds, speed)
 	def fiveSpeeds = ["low", "medium-low", "medium", "medium-high", "high"]
 	
 	if (max_speeds == 2)
-		return twoSpeeds.findIndexOf { it == speed }
+		return twoSpeeds.findIndexOf { it == speed }+1
 	else if (max_speeds == 3)
-		return threeSpeeds.findIndexOf { it == speed }
+		return threeSpeeds.findIndexOf { it == speed }+1
 	else if (max_speeds == 4)
-		return fourSpeeds.findIndexOf { it == speed }
+		return fourSpeeds.findIndexOf { it == speed }+1
 	else if (max_speeds == 5)
-		return fiveSpeeds.findIndexOf { it == speed }
+		return fiveSpeeds.findIndexOf { it == speed }+1
 }
 
 def handleFanSpeed(device, bondId, speed) {

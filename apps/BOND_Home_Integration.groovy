@@ -475,7 +475,7 @@ def handleOff(device, bondId) {
 		if (executeAction(bondId, "TurnOff") && shouldSendEvent(bondId)) 
 		{
 			device.sendEvent(name: "switch", value: "off")
-			if (device.hasCapability("FanControl")
+			if (device.hasCapability("FanControl"))
 				device.sendEvent(name: "speed", value: "off")
 			return true
 		}

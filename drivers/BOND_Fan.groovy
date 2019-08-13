@@ -33,6 +33,7 @@ def handleLightOff(device, id) {
 }
 
 def setSpeed(speed) {
-	state.lastSpeed = speed
+	if (speed != "off" && speed != "on")
+		state.lastSpeed = speed
     parent.handleFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
 }

@@ -445,6 +445,7 @@ def handleFanSpeed(device, bondId, speed) {
 	{
         if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fanProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
 		{
+			device.sendEvent(name: "switch", value: "on")
 			device.sendEvent(name: "speed", value: speed)
 		}
     }
@@ -474,6 +475,8 @@ def handleOff(device, bondId) {
 		if (executeAction(bondId, "TurnOff") && shouldSendEvent(bondId)) 
 		{
 			device.sendEvent(name: "switch", value: "off")
+			if (device.hasCapability("FanControl")
+				device.sendEvent(name: "speed", value: "off")
 			return true
 		}
 	}

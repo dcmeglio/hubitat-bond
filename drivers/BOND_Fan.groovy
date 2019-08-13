@@ -16,7 +16,6 @@ def on() {
 	parent.handleOn(device, device.deviceNetworkId.split(":")[1])
 	if (state.lastSpeed != null)
 	{
-		pauseExecution(500)
 		parent.handleFanSpeed(device, device.deviceNetworkId.split(":")[1], state.lastSpeed)
 	}
 }

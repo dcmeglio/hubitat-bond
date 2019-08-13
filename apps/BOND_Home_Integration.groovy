@@ -441,7 +441,7 @@ def handleFanSpeed(device, bondId, speed) {
 		handleOn(device, bondId)
     else if (hasAction(bondId, "SetSpeed")) 
 	{
-        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fanProperties[bondId].max_speed ?: 3, speed))) 
+        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fanProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
 		{
 			device.sendEvent(name: "speed", value: speed)
 		}
@@ -457,7 +457,7 @@ def handleFPFanSpeed(device, bondId, speed) {
 		handleOn(device, bondId)
     else if (hasAction(bondId, "SetSpeed")) 
 	{
-        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fireplaceProperties[bondId].max_speed ?: 3, speed))) 
+        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fireplaceProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
 		{
 			device.sendEvent(name: "speed", value: speed)
 		}

@@ -366,49 +366,52 @@ def updateDevices() {
 		}
     }
     
-    for (def i = 0; i < fireplaces.size(); i++)
-    {
-        def state = getState(fireplaces[i])
-        def device = getChildDevice("bond:" + fireplaces[i])
-        def deviceFan = device.getChildDevice("bond:" + fireplaces[i] + ":fan")
-        def deviceLight = device.getChildDevice("bond:" + fireplaces[i] + ":light")
-        
-        if (state.power > 0)
-        {
-            if (this.getProperty("fireplaceSensor${i}") == null)
-            {
-                device.sendEvent(name: "switch", value: "on")
-            }
-            if (deviceFan)
-            {
-				deviceFan.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fireplaceProperties[fireplaces[i]].max_speed ?: 3, state.fpfan_speed))
-            }
-            
-            if (deviceLight)
-            {
-                if (state.light == 1)
-                    deviceLight.sendEvent(name: "switch", value: "on")
-                else
-                    deviceLight.sendEvent(name: "switch", value: "off")
-            }
-        }
-        else 
-        {
-            if (this.getProperty("fireplaceSensor${i}") == null)
-            {
-                device.sendEvent(name: "switch", value: "off")
-            }
-            if (deviceFan)
-            {
-                deviceFan.sendEvent(name: "speed", value: "off")
-            }
-            if (deviceLight)
-            {
-                deviceLight.sendEvent(name: "switch", value: "off")
-            }
-        }
-        
-    }
+	if (fireplaces != null)
+	{
+		for (def i = 0; i < fireplaces.size(); i++)
+		{
+			def state = getState(fireplaces[i])
+			def device = getChildDevice("bond:" + fireplaces[i])
+			def deviceFan = device.getChildDevice("bond:" + fireplaces[i] + ":fan")
+			def deviceLight = device.getChildDevice("bond:" + fireplaces[i] + ":light")
+			
+			if (state.power > 0)
+			{
+				if (this.getProperty("fireplaceSensor${i}") == null)
+				{
+					device.sendEvent(name: "switch", value: "on")
+				}
+				if (deviceFan)
+				{
+					deviceFan.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fireplaceProperties[fireplaces[i]].max_speed ?: 3, state.fpfan_speed))
+				}
+				
+				if (deviceLight)
+				{
+					if (state.light == 1)
+						deviceLight.sendEvent(name: "switch", value: "on")
+					else
+						deviceLight.sendEvent(name: "switch", value: "off")
+				}
+			}
+			else 
+			{
+				if (this.getProperty("fireplaceSensor${i}") == null)
+				{
+					device.sendEvent(name: "switch", value: "off")
+				}
+				if (deviceFan)
+				{
+					deviceFan.sendEvent(name: "speed", value: "off")
+				}
+				if (deviceLight)
+				{
+					deviceLight.sendEvent(name: "switch", value: "off")
+				}
+			}
+			
+		}
+	}
 }
 
 def handleOn(device, bondId) {
@@ -673,13 +676,16 @@ def shouldSendEvent(bondId) {
 			return true;
 	}
 	
-	for (def i = 0; i < fireplaces.size(); i++)
+	if (fireplaces != null)
 	{
-		if (fireplaces[i] == bondId)
+		for (def i = 0; i < fireplaces.size(); i++)
 		{
-			if (this.getProperty("fireplaceSensor${i}") != null)
-				return false;
-			return true;
+			if (fireplaces[i] == bondId)
+			{
+				if (this.getProperty("fireplaceSensor${i}") != null)
+					return false;
+				return true;
+			}
 		}
 	}
 	return true;

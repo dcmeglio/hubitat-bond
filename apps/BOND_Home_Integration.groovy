@@ -109,6 +109,7 @@ def getDevices() {
 	try
 	{
 		httpGet(params) { resp ->
+			log.debug resp.data
 			for (deviceid in resp.data) {
 				if (deviceid.key == "_")
 					continue
@@ -132,6 +133,7 @@ def getDeviceById(id) {
 	try
 	{
 		httpGet(params) { resp ->
+			log.debug resp.data
 			if (resp.data.type == "FP")
             {
 				state.fireplaceList[id.key] = resp.data.name

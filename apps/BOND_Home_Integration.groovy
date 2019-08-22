@@ -203,7 +203,10 @@ def createChildDevices() {
 			def fanDevice = getChildDevice("bond:" + fan)
 			if (!fanDevice)
             {
-				fanDevice = addChildDevice("bond", "BOND Fan", "bond:" + fan, 1234, ["name": state.fanList[fan], isComponent: false])
+				if (state.fanDetails[fan].contains("SetDirection"))
+					fanDevice = addChildDevice("bond", "BOND Fan With Direction", "bond:" + fan, 1234, ["name": state.fanList[fan], isComponent: false])
+				else
+					fanDevice = addChildDevice("bond", "BOND Fan", "bond:" + fan, 1234, ["name": state.fanList[fan], isComponent: false])
 			}
 			if (state.fanDetails[fan].contains("TurnUpLightOn") && state.fanDetails[fan].contains("TurnDownLightOn"))
 			{
@@ -363,6 +366,13 @@ def updateDevices() {
 				deviceDownLight.sendEvent(name: "switch", value: "on")
             else
                 deviceDownLight.sendEvent(name: "switch", value: "off")		
+		}
+		if (device.hasAttribute("direction"))
+		{
+			if (state.direction == 1)
+				device.sendEvent(name: "direction", value: "forward")
+			else if (state.direction == -1)
+				device.sendEvent(name: "direction", value: "reverse")
 		}
     }
     
@@ -570,6 +580,21 @@ def handleOff(device, bondId) {
 		}
 	}
 	return false
+}
+
+def handleDirection(device, bondId, direction)
+{
+	logDebug "Handling Direction event for ${bondId}"
+	if (hasAction(bondId, "SetDirection")) 
+	{
+		def bondDirection = 1
+		if (direction == "reverse")
+			bondDirection = -1
+        if (executeAction(bondId, "SetDirection", bondDirection)) 
+		{
+			device.sendEvent(name: "direction", value: direction)
+		}
+    }
 }
 
 def getState(bondId) {

@@ -233,6 +233,7 @@ def cleanupChildDevices()
 			if (fireplace == deviceId)
 			{
 				deviceFound = true
+				cleanupFPComponents(device, fireplace)
 				break
 			}
 		}
@@ -245,6 +246,7 @@ def cleanupChildDevices()
 			if (fan == deviceId)
 			{
 				deviceFound = true
+				cleanupFanComponents(device, fan)
 				break
 			}
 		}
@@ -252,6 +254,31 @@ def cleanupChildDevices()
 			continue
 		
 		deleteChildDevice(device.deviceNetworkId)
+	}
+}
+
+def cleanupFPComponents(device, fireplace)
+{
+	if (!state.fireplaceDetails[fireplace].contains("TurnFpFanOn"))
+	{
+		device.deleteChildDevice("bond:" + fireplace + ":fan")
+	}
+	if (!state.fireplaceDetails[fireplace].contains("TurnLightOn"))
+	{
+		device.deleteChildDevice("bond:" + fireplace + ":light")
+	}
+}
+
+def cleanupFanComponents(device, fan)
+{
+	if (!state.fanDetails[fan].contains("TurnUpLightOn") || !state.fanDetails[fan].contains("TurnDownLightOn"))
+	{
+		device.deleteChildDevice("bond:" + fan + ":uplight")
+		device.deleteChildDevice("bond:" + fan + ":downlight")
+	}
+	if (!state.fanDetails[fan].contains("TurnLightOn") || (state.fanDetails[fan].contains("TurnUpLightOn") && state.fanDetails[fan].contains("TurnDownLightOn")))
+	{
+		device.deleteChildDevice("bond:" + fan + ":light")
 	}
 }
 

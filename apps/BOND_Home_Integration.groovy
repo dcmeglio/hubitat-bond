@@ -178,18 +178,21 @@ def createChildDevices() {
 	{
 		for (fireplace in fireplaces)
 		{
-			if (!getChildDevice("bond:" + fireplace))
+			def fpDevice = getChildDevice("bond:" + fireplace)
+			if (!fpDevice)
             {
-				def fpDevice = addChildDevice("bond", "BOND Fireplace", "bond:" + fireplace, 1234, ["name": state.fireplaceList[fireplace], isComponent: false])
-                if (state.fireplaceDetails[fireplace].contains("TurnFpFanOn"))
-                {
-                    fpDevice.addChildDevice("bond", "BOND Fireplace Fan", "bond:" + fireplace + ":fan", ["name": state.fireplaceList[fireplace] + " Fan", isComponent: true])
-                }
-                if (state.fireplaceDetails[fireplace].contains("TurnLightOn"))
-                {
-                    fpDevice.addChildDevice("bond", "BOND Fireplace Light", "bond:" + fireplace + ":light", ["name": state.fireplaceList[fireplace] + " Light", isComponent: true])
-                }
-            }
+				fpDevice = addChildDevice("bond", "BOND Fireplace", "bond:" + fireplace, 1234, ["name": state.fireplaceList[fireplace], isComponent: false])\
+			}
+			if (state.fireplaceDetails[fireplace].contains("TurnFpFanOn"))
+			{
+				if (!fpDevice.getChildDevice("bond:" + fireplace + ":fan"))
+					fpDevice.addChildDevice("bond", "BOND Fireplace Fan", "bond:" + fireplace + ":fan", ["name": state.fireplaceList[fireplace] + " Fan", isComponent: true])
+			}
+			if (state.fireplaceDetails[fireplace].contains("TurnLightOn"))
+			{
+				if (!fpDevice.getChildDevice("bond:" + fireplace + ":light"))
+					fpDevice.addChildDevice("bond", "BOND Fireplace Light", "bond:" + fireplace + ":light", ["name": state.fireplaceList[fireplace] + " Light", isComponent: true])
+			}
 		}
 	}
 	
@@ -197,14 +200,23 @@ def createChildDevices() {
 	{
 		for (fan in fans)
 		{
-			if (!getChildDevice("bond:" + fan))
+			def fanDevice = getChildDevice("bond:" + fan)
+			if (!fanDevice)
             {
-				def fanDevice = addChildDevice("bond", "BOND Fan", "bond:" + fan, 1234, ["name": state.fanList[fan], isComponent: false])
-                if (state.fanDetails[fan].contains("TurnLightOn"))
-                {
-                    fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
-                }
-            }
+				fanDevice = addChildDevice("bond", "BOND Fan", "bond:" + fan, 1234, ["name": state.fanList[fan], isComponent: false])
+			}
+			if (state.fanDetails[fan].contains("TurnUpLightOn") && state.fanDetails[fan].contains("TurnDownLightOn"))
+			{
+				if (!fanDevice.getChildDevice("bond:" + fan + ":uplight"))
+					fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":uplight", ["name": state.fanList[fan] + " Up Light", isComponent: true])
+				if (!fanDevice.getChildDevice("bond:" + fan + ":downlight"))
+					fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":downlight", ["name": state.fanList[fan] + " Down Light", isComponent: true])
+			}
+			else if (state.fanDetails[fan].contains("TurnLightOn"))
+			{
+				if (!fanDevice.getChildDevice("bond:" + fan + ":light"))
+					fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
+			}
 		}
 	}
 }
@@ -292,6 +304,8 @@ def updateDevices() {
         def state = getState(fan)
         def device = getChildDevice("bond:" + fan)
         def deviceLight = device.getChildDevice("bond:" + fan + ":light")
+		def deviceUpLight = device.getChildDevice("bond:" + fan + ":uplight")
+		def deviceDownLight = device.getChildDevice("bond:" + fan + ":downlight")
         if (state.power > 0)
         {
             device.sendEvent(name: "switch", value: "on")
@@ -309,6 +323,20 @@ def updateDevices() {
             else
                 deviceLight.sendEvent(name: "switch", value: "off")
         }
+		if (deviceUpLight)
+		{
+			if (state.light > 0 && state.up_light > 0)
+				deviceUpLight.sendEvent(name: "switch", value: "on")
+            else
+                deviceUpLight.sendEvent(name: "switch", value: "off")
+		}
+		if (deviceDownLight)
+		{
+			if (state.light > 0 && state.down_light > 0)
+				deviceDownLight.sendEvent(name: "switch", value: "on")
+            else
+                deviceDownLight.sendEvent(name: "switch", value: "off")		
+		}
     }
     
     for (def i = 0; i < fireplaces.size(); i++)
@@ -369,7 +397,21 @@ def handleOn(device, bondId) {
 
 def handleLightOn(device, bondId) {
     logDebug "Handling Light On event for ${bondId}"
-    if (hasAction(bondId, "TurnLightOn")) 
+	if (device.deviceNetworkId.contains("uplight") && hasAction(bondId, "TurnUpLightOn"))
+	{
+	        if (executeAction(bondId, "TurnUpLightOn")) 
+		{
+			device.sendEvent(name: "switch", value: "on")
+		}
+	}
+	else if (device.deviceNetworkId.contains("downlight") && hasAction(bondId, "TurnDownLightOn"))
+	{
+	        if (executeAction(bondId, "TurnDownLightOn")) 
+		{
+			device.sendEvent(name: "switch", value: "on")
+		}
+	}
+    else if (hasAction(bondId, "TurnLightOn")) 
 	{
         if (executeAction(bondId, "TurnLightOn")) 
 		{
@@ -379,8 +421,22 @@ def handleLightOn(device, bondId) {
 }
 
 def handleLightOff(device, bondId) {
-    logDebug "Handling Light Off event for ${bondId}"    
-    if (hasAction(bondId, "TurnLightOff")) 
+    logDebug "Handling Light Off event for ${bondId}"   
+	if (device.deviceNetworkId.contains("uplight") && hasAction(bondId, "TurnUpLightOff"))
+	{
+	        if (executeAction(bondId, "TurnUpLightOff")) 
+		{
+			device.sendEvent(name: "switch", value: "off")
+		}
+	}
+	else if (device.deviceNetworkId.contains("downlight") && hasAction(bondId, "TurnDownLightOff"))
+	{
+	        if (executeAction(bondId, "TurnDownLightOff")) 
+		{
+			device.sendEvent(name: "switch", value: "off")
+		}
+	}	
+    else if (hasAction(bondId, "TurnLightOff")) 
 	{
         if (executeAction(bondId, "TurnLightOff")) 
 		{

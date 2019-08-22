@@ -244,13 +244,16 @@ def cleanupChildDevices()
 }
 
 def subscribeSensorEvents() {
-	for (def i = 0; i < fireplaces.size(); i++)
+	if (fireplaces != null)
 	{
-		def sensorDevice = this.getProperty("fireplaceSensor${i}")
-		if (sensorDevice != null)
+		for (def i = 0; i < fireplaces.size(); i++)
 		{
-			logDebug "subscribing to power event for ${sensorDevice}"
-			subscribe(sensorDevice, "power", powerMeterEventHandler)
+			def sensorDevice = this.getProperty("fireplaceSensor${i}")
+			if (sensorDevice != null)
+			{
+				logDebug "subscribing to power event for ${sensorDevice}"
+				subscribe(sensorDevice, "power", powerMeterEventHandler)
+			}
 		}
 	}
 }

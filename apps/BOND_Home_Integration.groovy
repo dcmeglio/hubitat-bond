@@ -212,15 +212,33 @@ def createChildDevices() {
 			}
 			if (state.fanDetails[fan].contains("TurnUpLightOn") && state.fanDetails[fan].contains("TurnDownLightOn"))
 			{
-				if (!fanDevice.getChildDevice("bond:" + fan + ":uplight"))
-					fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":uplight", ["name": state.fanList[fan] + " Up Light", isComponent: true])
-				if (!fanDevice.getChildDevice("bond:" + fan + ":downlight"))
-					fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":downlight", ["name": state.fanList[fan] + " Down Light", isComponent: true])
+				if (state.fanDetails[fan].contains("SetUpLightBrightness") && state.fanDetails[fan].contains("SetDownLightBrightness"))
+				{
+					if (!fanDevice.getChildDevice("bond:" + fan + ":uplight"))
+						fanDevice.addChildDevice("bond", "BOND Fan Dimmable Light", "bond:" + fan + ":uplight", ["name": state.fanList[fan] + " Up Light", isComponent: true])
+					if (!fanDevice.getChildDevice("bond:" + fan + ":downlight"))
+						fanDevice.addChildDevice("bond", "BOND Fan Dimmable Light", "bond:" + fan + ":downlight", ["name": state.fanList[fan] + " Down Light", isComponent: true])
+
+				}
+				else
+				{
+					if (!fanDevice.getChildDevice("bond:" + fan + ":uplight"))
+						fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":uplight", ["name": state.fanList[fan] + " Up Light", isComponent: true])
+					if (!fanDevice.getChildDevice("bond:" + fan + ":downlight"))
+						fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":downlight", ["name": state.fanList[fan] + " Down Light", isComponent: true])
+				}
 			}
 			else if (state.fanDetails[fan].contains("TurnLightOn"))
 			{
 				if (!fanDevice.getChildDevice("bond:" + fan + ":light"))
-					fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
+				{
+					if (state.fanDetails[fan].contains("SetBrightness"))
+					{
+						fanDevice.addChildDevice("bond", "BOND Fan Dimmable Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
+					}
+					else
+						fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
+				}
 			}
 		}
 	}
@@ -350,24 +368,54 @@ def updateDevices() {
         }
         if (deviceLight)
         {
-            if (state.light > 0)
-                deviceLight.sendEvent(name: "switch", value: "on")
-            else
-                deviceLight.sendEvent(name: "switch", value: "off")
+			if (state.brightness != null)
+			{
+				if (state.light == 0)
+					deviceLight.sendEvent(name: "level", value: 0)
+				else
+					deviceLight.sendEvent(name: "level", value: state.brightness)
+			}
+			else
+			{
+				if (state.light > 0)
+					deviceLight.sendEvent(name: "switch", value: "on")
+				else
+					deviceLight.sendEvent(name: "switch", value: "off")
+			}
         }
 		if (deviceUpLight)
 		{
-			if (state.light > 0 && state.up_light > 0)
-				deviceUpLight.sendEvent(name: "switch", value: "on")
-            else
-                deviceUpLight.sendEvent(name: "switch", value: "off")
+			if (state.up_light_brightness != null)
+			{
+				if (state.up_light == 0)
+					deviceUpLight.sendEvent(name: "level", value: 0)
+				else
+					deviceUpLight.sendEvent(name: "level", value: state.up_light_brightness)
+			}
+			else
+			{
+				if (state.light > 0 && state.up_light > 0)
+					deviceUpLight.sendEvent(name: "switch", value: "on")
+				else
+					deviceUpLight.sendEvent(name: "switch", value: "off")
+			}
 		}
 		if (deviceDownLight)
 		{
-			if (state.light > 0 && state.down_light > 0)
-				deviceDownLight.sendEvent(name: "switch", value: "on")
-            else
-                deviceDownLight.sendEvent(name: "switch", value: "off")		
+			if (state.down_light_brightness != null)
+			{
+				if (state.down_light == 0)
+					deviceDownLight.sendEvent(name: "level", value: 0)
+				else
+					deviceDownLight.sendEvent(name: "level", value: state.down_light_brightness)
+			}
+			else
+			{
+				if (state.light > 0 && state.down_light > 0)
+					deviceDownLight.sendEvent(name: "switch", value: "on")
+				else
+					deviceDownLight.sendEvent(name: "switch", value: "off")	
+			}				
 		}
 		if (device.hasAttribute("direction"))
 		{
@@ -466,14 +514,14 @@ def handleLightOff(device, bondId) {
     logDebug "Handling Light Off event for ${bondId}"   
 	if (device.deviceNetworkId.contains("uplight") && hasAction(bondId, "TurnUpLightOff"))
 	{
-	        if (executeAction(bondId, "TurnUpLightOff")) 
+		if (executeAction(bondId, "TurnUpLightOff")) 
 		{
 			device.sendEvent(name: "switch", value: "off")
 		}
 	}
 	else if (device.deviceNetworkId.contains("downlight") && hasAction(bondId, "TurnDownLightOff"))
 	{
-	        if (executeAction(bondId, "TurnDownLightOff")) 
+		if (executeAction(bondId, "TurnDownLightOff")) 
 		{
 			device.sendEvent(name: "switch", value: "off")
 		}
@@ -483,6 +531,31 @@ def handleLightOff(device, bondId) {
         if (executeAction(bondId, "TurnLightOff")) 
 		{
 			device.sendEvent(name: "switch", value: "off")
+		}
+    }
+}
+
+def handleLightLevel(device, bondId, level) {
+	    logDebug "Handling Light Level event for ${bondId}"
+	if (device.deviceNetworkId.contains("uplight") && hasAction(bondId, "SetUpLightBrightness"))
+	{
+		if (executeAction(bondId, "SetUpLightBrightness", level)) 
+		{
+			device.sendEvent(name: "level", value: level)
+		}
+	}
+	else if (device.deviceNetworkId.contains("downlight") && hasAction(bondId, "SetDownLightBrightness"))
+	{
+		if (executeAction(bondId, "SetDownLightBrightness", level)) 
+		{
+			device.sendEvent(name: "level", value: level)
+		}
+	}
+    else if (hasAction(bondId, "SetBrightness")) 
+	{
+        if (executeAction(bondId, "SetBrightness", level)) 
+		{
+			device.sendEvent(name: "level", value: level)
 		}
     }
 }

@@ -11,6 +11,7 @@ Fireplaces currently support on/off (which can also be optionally monitored by a
 You must install all of the device drivers for the integration to work properly.
 * BOND Fan
 * BOND Fan Light
+* BOND Fan Dimmable Light
 * BOND Fan With Direction
 * BOND Fireplace
 * BOND Fireplace Fan
@@ -29,4 +30,3 @@ If you chose any fireplaces and you have power meters setup, you will optionally
 ## Limitations
 * Only supports a single BOND hub per app installation
 * Shades are not supported
-* Fan light dimmers are not supported

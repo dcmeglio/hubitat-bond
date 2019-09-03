@@ -30,4 +30,3 @@ If you chose any fireplaces and you have power meters setup, you will optionally
 * Only supports a single BOND hub per app installation
 * Shades are not supported
 * Fan light dimmers are not supported
-* Fireplace fan on/off is not supported

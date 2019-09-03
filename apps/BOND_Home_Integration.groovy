@@ -556,9 +556,9 @@ def handleFPFanSpeed(device, bondId, speed) {
     logDebug "Handling Fireplace Fan Speed event for ${bondId}"
 
 	if (speed == "off")	
-		handleOff(device, bondId)
+		handleFPFanOff(device, bondId)
 	else if (speed == "on")
-		handleOn(device, bondId)
+		handleFPFanOn(device, bondId)
     else if (hasAction(bondId, "SetSpeed")) 
 	{
         if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fireplaceProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
@@ -566,6 +566,36 @@ def handleFPFanSpeed(device, bondId, speed) {
 			device.sendEvent(name: "speed", value: speed)
 		}
     }
+}
+
+def handleFPFanOn() {
+	logDebug "Handling Fan On event for ${bondId}"
+	
+	if (hasAction(bondId, "TurnFpFanOn")) 
+	{
+		if (executeAction(bondId, "TurnFpFanOn")) 
+		{
+			device.sendEvent(name: "switch", value: "on")
+			device.sendEvent(name: "speed", value: "on")
+			return true
+		}
+	}
+	return false
+}
+
+def handleFPFanOff() {
+	logDebug "Handling Fan Off event for ${bondId}"
+	
+	if (hasAction(bondId, "TurnFpFanOff")) 
+	{
+		if (executeAction(bondId, "TurnFpFanOff")) 
+		{
+			device.sendEvent(name: "switch", value: "off")
+			device.sendEvent(name: "speed", value: "off")
+			return true
+		}
+	}
+	return false
 }
 
 def handleOff(device, bondId) {

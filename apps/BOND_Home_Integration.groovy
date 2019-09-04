@@ -40,6 +40,8 @@ def prefListDevices() {
 				input(name: "fireplaces", type: "enum", title: "Fireplaces", required:false, multiple:true, options:state.fireplaceList, hideWhenEmpty: true)
 			if (state.fanList.size() > 0)
 				input(name: "fans", type: "enum", title: "Fans", required:false, multiple:true, options:state.fanList, hideWhenEmpty: true)
+			if (state.shadeList.size() > 0)
+				input(name: "shades", type: "enum", title: "Shades", required:false, multiple:true, options:state.shadeList, hideWhenEmpty: true)
 		}
 	}
 }
@@ -99,6 +101,9 @@ def getDevices() {
 	state.fanList = [:]
     state.fanDetails = [:]
 	state.fanProperties = [:]
+	state.shadeList = [:]
+	state.shadeDetails = [:]
+	state.shadeProperties = [:]
 	state.deviceList = [:]
 	def params = [
 		uri: "http://${hubIp}",
@@ -146,6 +151,12 @@ def getDeviceById(id) {
                 state.fanDetails[id.key] = resp.data.actions
 				state.fanProperties[id.key] = getDeviceProperties(id)
             }
+			else if (resp.data.type == "MS")
+			{
+				state.shadeList[id.key] = resp.data.name
+                state.shadeDetails[id.key] = resp.data.actions
+				state.shadeProperties[id.key] = getDeviceProperties(id)
+			}
 		}
 	}
 	catch (e)
@@ -242,6 +253,18 @@ def createChildDevices() {
 			}
 		}
 	}
+	
+	if (shades != null)
+	{
+		for (shade in shades)
+		{
+			def shadeDevice = getChildDevice("bond:" + shade)
+			if (!shadeDevice)
+            {
+				shadeDevice = addChildDevice("bond", "BOND Motorized Shade", "bond:" + shade, 1234, ["name": state.shadeList[shade], isComponent: false])
+			}
+		}
+	}
 }
 
 def cleanupChildDevices()
@@ -270,6 +293,17 @@ def cleanupChildDevices()
 			{
 				deviceFound = true
 				cleanupFanComponents(device, fan)
+				break
+			}
+		}
+		if (deviceFound == true)
+			continue
+			
+		for (shade in shades)
+		{
+			if (shade == deviceId)
+			{
+				deviceFound = true
 				break
 			}
 		}
@@ -472,6 +506,24 @@ def updateDevices() {
 			
 		}
 	}
+	
+	if (shades != null)
+	{
+		for (shade in shades)
+		{
+			def state = getState(shade)
+			def device = getChildDevice("bond:" + shade)
+			
+			if (state.open == 1)
+			{
+				device.sendEvent(name: "windowShade", value: "open")
+			}
+			else
+			{
+				device.sendEvent(name: "windowShade", value: "closed")
+			}
+		}
+	}
 }
 
 def handleOn(device, bondId) {
@@ -536,7 +588,7 @@ def handleLightOff(device, bondId) {
 }
 
 def handleLightLevel(device, bondId, level) {
-	    logDebug "Handling Light Level event for ${bondId}"
+	logDebug "Handling Light Level event for ${bondId}"
 	if (device.deviceNetworkId.contains("uplight") && hasAction(bondId, "SetUpLightBrightness"))
 	{
 		if (executeAction(bondId, "SetUpLightBrightness", level)) 
@@ -556,6 +608,32 @@ def handleLightLevel(device, bondId, level) {
         if (executeAction(bondId, "SetBrightness", level)) 
 		{
 			device.sendEvent(name: "level", value: level)
+		}
+    }
+}
+
+def handleOpen(device, bondId)
+{
+	logDebug "Handling Open event for ${bondId}"
+	
+	if (hasAction(bondId, "Open")) 
+	{
+        if (executeAction(bondId, "Open")) 
+		{
+			device.sendEvent(name: "windowShade", value: "open")
+		}
+    }
+}
+
+def handleClose(device, bondId)
+{
+	logDebug "Handling Close event for ${bondId}"
+	
+	if (hasAction(bondId, "Close")) 
+	{
+        if (executeAction(bondId, "Close")) 
+		{
+			device.sendEvent(name: "windowShade", value: "closed")
 		}
     }
 }

@@ -359,7 +359,7 @@ def updateDevices() {
         if (state.power > 0)
         {
             device.sendEvent(name: "switch", value: "on")
-			device.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fanProperties[fan].max_speed ?: 3, state.speed))
+			device.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fanProperties?.getAt(fan)?.max_speed ?: 3, state.speed))
         }
         else
         {
@@ -443,7 +443,7 @@ def updateDevices() {
 				}
 				if (deviceFan)
 				{
-					deviceFan.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fireplaceProperties[fireplaces[i]].max_speed ?: 3, state.fpfan_speed))
+					deviceFan.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fireplaceProperties?.getAt(fireplaces[i])?.max_speed ?: 3, state.fpfan_speed))
 				}
 				
 				if (deviceLight)
@@ -581,6 +581,8 @@ def translateBondFanSpeedToHE(max_speeds, speed)
 		return fourSpeeds[speed]	
 	else if (max_speeds == 5 && speed < 5)
 		return fiveSpeeds[speed]
+	else
+		log.error "translateBondFanSpeedToHE: Error because max_speeds is ${max_speeds}"
 		
 	return 0
 }
@@ -603,6 +605,8 @@ def translateHEFanSpeedToBond(max_speeds, speed)
 		return fourSpeeds.findIndexOf { it == speed }+1
 	else if (max_speeds == 5)
 		return fiveSpeeds.findIndexOf { it == speed }+1
+	else 
+		log.error "translateHEFanSpeedToBond: Error because max_speeds is ${max_speeds}"
 }
 
 def handleFanSpeed(device, bondId, speed) {
@@ -767,6 +771,7 @@ def executeAction(bondId, action) {
 	{
 		httpPut(params) { resp ->
 			isSuccessful = (resp.status == 204)
+			logDebug "Status: ${resp.status} Data: ${resp.data}"
 		}
 	}
 	catch (e) 
@@ -790,6 +795,7 @@ def executeAction(bondId, action, argument) {
 	{
 		httpPut(params) { resp ->
 			isSuccessful = (resp.status == 204)
+			logDebug "Status: ${resp.status} Data: ${resp.data}"
 		}
 	}
 	catch (e) 

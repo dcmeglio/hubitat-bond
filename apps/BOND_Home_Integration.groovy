@@ -562,29 +562,26 @@ def handleLightLevel(device, bondId, level) {
 
 def translateBondFanSpeedToHE(max_speeds, speed)
 {
+	def speedTranslations = 
+	[
+		10: [10: "high", 9: "high", 8: "medium-high", 7: "medium-high", 6: "medium", 5: "medium", 4: "medium-low", 3: "medium-low", 2: 1, 1: "low"],
+		9: [9: "high", 8: "medium-high", 7: "medium-high", 6: "medium", 5: "medium", 4: "medium-low", 3: "medium-low", 2: "low", 1: "low"],
+		8: [8: "high", 7: "medium-high", 6: "medium-high", 5: "medium", 4: "medium", 3: "medium-low", 2: "medium-low", 1: "low"],
+		7: [7: "high", 6: "medium-high", 5: "medium", 4: "medium", 3: "medium-low", 2: "medium-low", 1: "low"],
+		6: [6: "high", 5: "medium-high", 4: "medium", 3: "medium", 2: "medium-low", 1: "low"],
+		5: [5: "high", 4: "medium-high", 3: "medium", 2: "medium-low", 1: "low"],
+		4: [4: "high", 3: "medium", 2: "medium-low", 1: "low"],
+		3: [3: "high", 2: "medium", 1: "low"],
+		2: [2: "high", 1: "low" ]
+	]
+	
 	if (!speed.isNumber())
 		return speed
 		
-	// So the array indices match
-	speed--
-	
-	def twoSpeeds = ["low", "high"]
-	def threeSpeeds = ["low", "medium", "high"]
-	def fourSpeeds = ["low", "medium-low", "medium", "high"]
-	def fiveSpeeds = ["low", "medium-low", "medium", "medium-high", "high"]
-	
-	if (max_speeds == 2 && speed < 2)
-		return twoSpeeds[speed]
-	else if (max_speeds == 3 && speed < 3)
-		return threeSpeeds[speed]	
-	else if (max_speeds == 4 && speed < 4)
-		return fourSpeeds[speed]	
-	else if (max_speeds == 5 && speed < 5)
-		return fiveSpeeds[speed]
-	else
-		log.error "translateBondFanSpeedToHE: Error because max_speeds is ${max_speeds}"
+	if (max_speeds > 10 || speed > max_speeds)
+		return 0
 		
-	return 0
+	return speedTranslations[max_speeds][speed]
 }
 
 def translateHEFanSpeedToBond(max_speeds, speed)
@@ -592,21 +589,24 @@ def translateHEFanSpeedToBond(max_speeds, speed)
 	if (speed.isNumber())
 		return speed.toInteger()
 		
-	def twoSpeeds = ["low", "high"]
-	def threeSpeeds = ["low", "medium", "high"]
-	def fourSpeeds = ["low", "medium-low", "medium", "high"]
-	def fiveSpeeds = ["low", "medium-low", "medium", "medium-high", "high"]
+		
+	def speedTranslations =
+	[
+		10: ["high": 10, "medium-high": 8, "medium": 5, "medium-low": 3, "low": 1],
+		9: ["high": 9, "medium-high": 7, ":medium": 5, "medium-low": 3, "low": 1],
+		8: ["high": 8, "medium-high": 6, "medium": 4, "medium-low": 3, "low": 1],
+		7: ["high": 7, "medium-high": 6, "medium": 4, "medium-low": 3, "low": 1 ],
+		6: ["high": 6, "medium-high": 5, "medium": 3, "medium-low": 2, "low": 1],
+		5: ["high": 5, "medium-high": 4, "medium": 3, "medium-low": 2, "low": 1],
+		4: ["high": 4, "medium": 3, "medium-low": 2, "low": 1],
+		3: ["high": 3, "medium": 2, "low": 1],
+		2: ["high": 2, "low": 1]
+	]
 	
-	if (max_speeds == 2)
-		return twoSpeeds.findIndexOf { it == speed }+1
-	else if (max_speeds == 3)
-		return threeSpeeds.findIndexOf { it == speed }+1
-	else if (max_speeds == 4)
-		return fourSpeeds.findIndexOf { it == speed }+1
-	else if (max_speeds == 5)
-		return fiveSpeeds.findIndexOf { it == speed }+1
-	else 
-		log.error "translateHEFanSpeedToBond: Error because max_speeds is ${max_speeds}"
+	if (max_speeds > 10)
+		return null
+		
+	return speedTranslations[max_speeds][speed]
 }
 
 def handleFanSpeed(device, bondId, speed) {

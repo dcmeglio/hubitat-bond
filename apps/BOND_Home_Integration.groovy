@@ -575,7 +575,7 @@ def translateBondFanSpeedToHE(max_speeds, speed)
 		2: [2: "high", 1: "low" ]
 	]
 	logDebug "Translating ${speed} to BOND"
-	if (!speed.isNumber())
+	if (!speed.toString().isNumber())
 		return speed
 		
 	if (max_speeds > 10 || speed > max_speeds)

@@ -31,3 +31,10 @@ def handleFPFanSpeed(device, id, speed) {
     parent.handleFPFanSpeed(device, id, speed)
 }
     
+def handleFPFanOn(device, id) {
+    parent.handleFPFanOn(device, id)
+}
+
+def handleFPFanOff(device, id) {
+    parent.handleFPFanOff(device, id)
+}

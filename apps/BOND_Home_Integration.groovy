@@ -730,7 +730,7 @@ def handleFPFanSpeed(device, bondId, speed) {
     }
 }
 
-def handleFPFanOn() {
+def handleFPFanOn(device, bondId) {
 	logDebug "Handling Fan On event for ${bondId}"
 	
 	if (hasAction(bondId, "TurnFpFanOn")) 
@@ -745,7 +745,7 @@ def handleFPFanOn() {
 	return false
 }
 
-def handleFPFanOff() {
+def handleFPFanOff(device, bondId) {
 	logDebug "Handling Fan Off event for ${bondId}"
 	
 	if (hasAction(bondId, "TurnFpFanOff")) 

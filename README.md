@@ -2,10 +2,13 @@
 BOND Home Integration for Hubitat. This currently supports both fireplaces and fans.
  
 ## Fans
-Fans currently support on/off, speed settings, direction, and lights (both a single light and up/down lights). Currently dimmers are not supported.
+Fans currently support on/off, speed settings, direction, and lights (both a single light and up/down lights).
  
 ## Fireplaces
 Fireplaces currently support on/off (which can also be optionally monitored by a power meter), fan speed settings, and a light.
+
+## Shades
+Shades support open/closed.
 
 ## Devices
 You must install all of the device drivers for the integration to work properly.
@@ -16,6 +19,7 @@ You must install all of the device drivers for the integration to work properly.
 * BOND Fireplace
 * BOND Fireplace Fan
 * BOND Fireplace Light
+* BOND Motorized Shade
 
 ## Apps
 The BOND Home Integration app is what actually communicates with the BOND Hub device. This relies on the BOND Home Local API which is only available in the v2 BOND Home firmware.
@@ -29,4 +33,3 @@ If you chose any fireplaces and you have power meters setup, you will optionally
 
 ## Limitations
 * Only supports a single BOND hub per app installation
-* Shades are not supported

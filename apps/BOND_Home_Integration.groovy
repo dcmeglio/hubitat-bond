@@ -126,7 +126,7 @@ def getDevices() {
 	}
 	catch (e)
 	{
-		log.debug "HTTP Exception Received on GET: $e"
+		checkHttpResponse("getDevices", e.getResponse())
 	}
 }
 
@@ -165,7 +165,7 @@ def getDeviceById(id) {
 	}
 	catch (e)
 	{
-		log.debug "HTTP Exception Received on GET: $e"
+		checkHttpResponse("getDeviceById", e.getResponse())
 	}
 }
 
@@ -188,7 +188,7 @@ def getDeviceProperties(id) {
 	}
 	catch (e)
 	{
-		log.debug "HTTP Exception Received on GET: $e"
+		checkHttpResponse("getDeviceProperties", e.getResponse())
 	}
 	return result
 }
@@ -808,7 +808,7 @@ def getState(bondId) {
 	}
 	catch (e)
 	{
-		log.debug "HTTP Exception Received on GET: $e"
+		checkHttpResponse("getState", e.getResponse())
 	}
 	return stateToReturn
 }
@@ -841,7 +841,7 @@ def hasAction(bondId, commandType) {
 	}
 	catch (e)
 	{
-		log.debug "HTTP Exception Received on GET: $e"
+		checkHttpResponse("hasAction", e.getResponse())
 	}
 	return commandToReturn
 }
@@ -864,7 +864,7 @@ def executeAction(bondId, action) {
 	}
 	catch (e) 
 	{
-		log.debug "HTTP Exception Received on PUT: $e"
+		checkHttpResponse("executeAction", e.getResponse())
 	}
 	return isSuccessful
 }
@@ -887,7 +887,7 @@ def executeAction(bondId, action, argument) {
 	}
 	catch (e) 
 	{
-		log.debug "HTTP Exception Received on PUT: $e"
+		checkHttpResponse("executeAction", e.getResponse())
 	}
 	return isSuccessful
 }
@@ -925,7 +925,7 @@ def checkHttpResponse(action, resp) {
 		return true
 	else if (resp.status == 400 || resp.status == 401 || resp.status == 404 || resp.status == 409 || resp.status == 500)
 	{
-		log.error "${action}: ${resp.data.error_msg} (id: ${resp.data.error_id}, code: ${resp.data.error_code})"
+		log.error "${action}: ${resp.getData()}"
 		return false
 	}
 	else

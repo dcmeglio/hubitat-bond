@@ -114,11 +114,13 @@ def getDevices() {
 	try
 	{
 		httpGet(params) { resp ->
-			log.debug resp.data
-			for (deviceid in resp.data) {
-				if (deviceid.key == "_")
-					continue
-				getDeviceById(deviceid);
+			if (checkHttpResponse("getDevices", resp))
+			{
+				for (deviceid in resp.data) {
+					if (deviceid.key == "_")
+						continue
+					getDeviceById(deviceid);
+				}
 			}
 		}
 	}
@@ -138,24 +140,26 @@ def getDeviceById(id) {
 	try
 	{
 		httpGet(params) { resp ->
-			log.debug resp.data
-			if (resp.data.type == "FP")
-            {
-				state.fireplaceList[id.key] = resp.data.name
-                state.fireplaceDetails[id.key] = resp.data.actions
-				state.fireplaceProperties[id.key] = getDeviceProperties(id)
-            }
-			else if (resp.data.type == "CF")
-            {
-				state.fanList[id.key] = resp.data.name
-                state.fanDetails[id.key] = resp.data.actions
-				state.fanProperties[id.key] = getDeviceProperties(id)
-            }
-			else if (resp.data.type == "MS")
+			if (checkHttpResponse("getDeviceById", resp))
 			{
-				state.shadeList[id.key] = resp.data.name
-                state.shadeDetails[id.key] = resp.data.actions
-				state.shadeProperties[id.key] = getDeviceProperties(id)
+				if (resp.data.type == "FP")
+				{
+					state.fireplaceList[id.key] = resp.data.name
+					state.fireplaceDetails[id.key] = resp.data.actions
+					state.fireplaceProperties[id.key] = getDeviceProperties(id)
+				}
+				else if (resp.data.type == "CF")
+				{
+					state.fanList[id.key] = resp.data.name
+					state.fanDetails[id.key] = resp.data.actions
+					state.fanProperties[id.key] = getDeviceProperties(id)
+				}
+				else if (resp.data.type == "MS")
+				{
+					state.shadeList[id.key] = resp.data.name
+					state.shadeDetails[id.key] = resp.data.actions
+					state.shadeProperties[id.key] = getDeviceProperties(id)
+				}
 			}
 		}
 	}
@@ -176,7 +180,10 @@ def getDeviceProperties(id) {
 	try
 	{
 		httpGet(params) { resp ->
-			result = resp.data
+			if (checkHttpResponse("getDeviceProperties", resp))
+			{
+				result = resp.data
+			}
 		}
 	}
 	catch (e)
@@ -795,7 +802,8 @@ def getState(bondId) {
 	try
 	{
 		httpGet(params) { resp ->
-            stateToReturn = resp.data
+			if (checkHttpResponse("getState", resp))
+				stateToReturn = resp.data
 		}
 	}
 	catch (e)
@@ -817,13 +825,16 @@ def hasAction(bondId, commandType) {
 	try
 	{
 		httpGet(params) { resp ->
-			for (commandId in resp.data) {
-				if (commandId.key == "_")
-					continue
-				if (commandId.key == commandType) {
-					logDebug "found command ${commandId.key} for ${bondId}"
-					commandToReturn = true
-					break
+			if (checkHttpResponse("hasAction", resp))
+			{
+				for (commandId in resp.data) {
+					if (commandId.key == "_")
+						continue
+					if (commandId.key == commandType) {
+						logDebug "found command ${commandId.key} for ${bondId}"
+						commandToReturn = true
+						break
+					}
 				}
 			}
 		}
@@ -848,8 +859,7 @@ def executeAction(bondId, action) {
 	try
 	{
 		httpPut(params) { resp ->
-			isSuccessful = (resp.status == 204)
-			logDebug "Status: ${resp.status} Data: ${resp.data}"
+			isSuccessful = checkHttpResponse("executeAction", resp)
 		}
 	}
 	catch (e) 
@@ -872,8 +882,7 @@ def executeAction(bondId, action, argument) {
 	try
 	{
 		httpPut(params) { resp ->
-			isSuccessful = (resp.status == 204)
-			logDebug "Status: ${resp.status} Data: ${resp.data}"
+			isSuccessful = checkHttpResponse("executeAction", resp)
 		}
 	}
 	catch (e) 
@@ -908,5 +917,20 @@ def shouldSendEvent(bondId) {
 def logDebug(msg) {
     if (settings?.debugOutput) {
 		log.debug msg
+	}
+}
+
+def checkHttpResponse(action, resp) {
+	if (resp.status == 200 || resp.status == 201 || resp.status == 204)
+		return true
+	else if (resp.status == 400 || resp.status == 401 || resp.status == 404 || resp.status == 409 || resp.status == 500)
+	{
+		log.error "${action}: ${resp.data.error_msg} (id: ${resp.data.error_id}, code: ${resp.data.error_code})"
+		return false
+	}
+	else
+	{
+		log.error "${action}: unexpected HTTP response: ${resp.status}"
+		return false
 	}
 }

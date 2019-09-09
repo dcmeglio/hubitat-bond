@@ -33,15 +33,25 @@ def prefHub() {
 }
 
 def prefListDevices() {
-	getDevices();
-	return dynamicPage(name: "prefListDevices", title: "Devices", nextPage: "prefPowerSensors", install: false, uninstall: false) {
-		section("Devices") {
-			if (state.fireplaceList.size() > 0)
-				input(name: "fireplaces", type: "enum", title: "Fireplaces", required:false, multiple:true, options:state.fireplaceList, hideWhenEmpty: true)
-			if (state.fanList.size() > 0)
-				input(name: "fans", type: "enum", title: "Fans", required:false, multiple:true, options:state.fanList, hideWhenEmpty: true)
-			if (state.shadeList.size() > 0)
-				input(name: "shades", type: "enum", title: "Shades", required:false, multiple:true, options:state.shadeList, hideWhenEmpty: true)
+	if (!getDevices())
+	{
+		return dynamicPage(name: "prefListDevices", title: "Connection Error", install: false, uninstall: false) {
+			section("Error") {
+				paragraph "Unable to retrieve devices. Please verify your BOND Hub ID and Token"
+			}
+		}
+	}
+	else
+	{
+		return dynamicPage(name: "prefListDevices", title: "Devices", nextPage: "prefPowerSensors", install: false, uninstall: false) {
+			section("Devices") {
+				if (state.fireplaceList.size() > 0)
+					input(name: "fireplaces", type: "enum", title: "Fireplaces", required:false, multiple:true, options:state.fireplaceList, hideWhenEmpty: true)
+				if (state.fanList.size() > 0)
+					input(name: "fans", type: "enum", title: "Fans", required:false, multiple:true, options:state.fanList, hideWhenEmpty: true)
+				if (state.shadeList.size() > 0)
+					input(name: "shades", type: "enum", title: "Shades", required:false, multiple:true, options:state.shadeList, hideWhenEmpty: true)
+			}
 		}
 	}
 }
@@ -113,6 +123,7 @@ def getDevices() {
 	]
 	try
 	{
+		def result = false
 		httpGet(params) { resp ->
 			if (checkHttpResponse("getDevices", resp))
 			{
@@ -121,12 +132,15 @@ def getDevices() {
 						continue
 					getDeviceById(deviceid);
 				}
+				result = true
 			}
 		}
+		return result
 	}
 	catch (e)
 	{
 		checkHttpResponse("getDevices", e.getResponse())
+		return false
 	}
 }
 

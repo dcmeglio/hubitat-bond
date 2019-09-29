@@ -524,7 +524,6 @@ def updateDevices() {
 					deviceLight.sendEvent(name: "switch", value: "off")
 				}
 			}
-			
 		}
 	}
 	

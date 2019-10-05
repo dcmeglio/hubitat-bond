@@ -524,6 +524,7 @@ def updateDevices() {
 					deviceLight.sendEvent(name: "switch", value: "off")
 				}
 			}
+			
 		}
 	}
 	
@@ -548,32 +549,31 @@ def updateDevices() {
 
 def handleOn(device, bondId) {
 	logDebug "Handling On event for ${bondId}"
-	if (hasAction(bondId, "TurnOn")) 
-	{
-		if (executeAction(bondId, "TurnOn") && shouldSendEvent(bondId))
-		{
-			device.sendEvent(name: "switch", value: "on")
-		}
-	}
+
+    if (executeAction(bondId, "TurnOn") && shouldSendEvent(bondId))
+    {
+        device.sendEvent(name: "switch", value: "on")
+    }
+	
 }
 
 def handleLightOn(device, bondId) {
     logDebug "Handling Light On event for ${bondId}"
-	if (device.deviceNetworkId.contains("uplight") && hasAction(bondId, "TurnUpLightOn"))
+	if (device.deviceNetworkId.contains("uplight"))
 	{
 	        if (executeAction(bondId, "TurnUpLightOn")) 
 		{
 			device.sendEvent(name: "switch", value: "on")
 		}
 	}
-	else if (device.deviceNetworkId.contains("downlight") && hasAction(bondId, "TurnDownLightOn"))
+	else if (device.deviceNetworkId.contains("downlight"))
 	{
 	        if (executeAction(bondId, "TurnDownLightOn")) 
 		{
 			device.sendEvent(name: "switch", value: "on")
 		}
 	}
-    else if (hasAction(bondId, "TurnLightOn")) 
+    else
 	{
         if (executeAction(bondId, "TurnLightOn")) 
 		{
@@ -584,21 +584,21 @@ def handleLightOn(device, bondId) {
 
 def handleLightOff(device, bondId) {
     logDebug "Handling Light Off event for ${bondId}"   
-	if (device.deviceNetworkId.contains("uplight") && hasAction(bondId, "TurnUpLightOff"))
+	if (device.deviceNetworkId.contains("uplight"))
 	{
 		if (executeAction(bondId, "TurnUpLightOff")) 
 		{
 			device.sendEvent(name: "switch", value: "off")
 		}
 	}
-	else if (device.deviceNetworkId.contains("downlight") && hasAction(bondId, "TurnDownLightOff"))
+	else if (device.deviceNetworkId.contains("downlight"))
 	{
 		if (executeAction(bondId, "TurnDownLightOff")) 
 		{
 			device.sendEvent(name: "switch", value: "off")
 		}
 	}	
-    else if (hasAction(bondId, "TurnLightOff")) 
+    else
 	{
         if (executeAction(bondId, "TurnLightOff")) 
 		{
@@ -609,21 +609,21 @@ def handleLightOff(device, bondId) {
 
 def handleLightLevel(device, bondId, level) {
 	logDebug "Handling Light Level event for ${bondId}"
-	if (device.deviceNetworkId.contains("uplight") && hasAction(bondId, "SetUpLightBrightness"))
+	if (device.deviceNetworkId.contains("uplight"))
 	{
 		if (executeAction(bondId, "SetUpLightBrightness", level)) 
 		{
 			device.sendEvent(name: "level", value: level)
 		}
 	}
-	else if (device.deviceNetworkId.contains("downlight") && hasAction(bondId, "SetDownLightBrightness"))
+	else if (device.deviceNetworkId.contains("downlight"))
 	{
 		if (executeAction(bondId, "SetDownLightBrightness", level)) 
 		{
 			device.sendEvent(name: "level", value: level)
 		}
 	}
-    else if (hasAction(bondId, "SetBrightness")) 
+    else 
 	{
         if (executeAction(bondId, "SetBrightness", level)) 
 		{
@@ -636,25 +636,20 @@ def handleOpen(device, bondId)
 {
 	logDebug "Handling Open event for ${bondId}"
 	
-	if (hasAction(bondId, "Open")) 
-	{
-        if (executeAction(bondId, "Open")) 
-		{
-			device.sendEvent(name: "windowShade", value: "open")
-		}
+    if (executeAction(bondId, "Open")) 
+    {
+        device.sendEvent(name: "windowShade", value: "open")
     }
+    
 }
 
 def handleClose(device, bondId)
 {
 	logDebug "Handling Close event for ${bondId}"
 	
-	if (hasAction(bondId, "Close")) 
-	{
-        if (executeAction(bondId, "Close")) 
-		{
-			device.sendEvent(name: "windowShade", value: "closed")
-		}
+    if (executeAction(bondId, "Close")) 
+    {
+        device.sendEvent(name: "windowShade", value: "closed")
     }
 }
 
@@ -717,7 +712,7 @@ def handleFanSpeed(device, bondId, speed) {
 	}	
 	else if (speed == "on")
 		handleOn(device, bondId)
-    else if (hasAction(bondId, "SetSpeed")) 
+    else
 	{
         if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fanProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
 		{
@@ -734,7 +729,7 @@ def handleFPFanSpeed(device, bondId, speed) {
 		handleFPFanOff(device, bondId)
 	else if (speed == "on")
 		handleFPFanOn(device, bondId)
-    else if (hasAction(bondId, "SetSpeed")) 
+    else
 	{
         if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fireplaceProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
 		{
@@ -746,62 +741,57 @@ def handleFPFanSpeed(device, bondId, speed) {
 def handleFPFanOn(device, bondId) {
 	logDebug "Handling Fan On event for ${bondId}"
 	
-	if (hasAction(bondId, "TurnFpFanOn")) 
-	{
-		if (executeAction(bondId, "TurnFpFanOn")) 
-		{
-			device.sendEvent(name: "switch", value: "on")
-			device.sendEvent(name: "speed", value: "on")
-			return true
-		}
-	}
+    if (executeAction(bondId, "TurnFpFanOn")) 
+    {
+        device.sendEvent(name: "switch", value: "on")
+        device.sendEvent(name: "speed", value: "on")
+        return true
+    }
+	
 	return false
 }
 
 def handleFPFanOff(device, bondId) {
 	logDebug "Handling Fan Off event for ${bondId}"
 	
-	if (hasAction(bondId, "TurnFpFanOff")) 
-	{
-		if (executeAction(bondId, "TurnFpFanOff")) 
-		{
-			device.sendEvent(name: "switch", value: "off")
-			device.sendEvent(name: "speed", value: "off")
-			return true
-		}
-	}
+	
+    if (executeAction(bondId, "TurnFpFanOff")) 
+    {
+        device.sendEvent(name: "switch", value: "off")
+        device.sendEvent(name: "speed", value: "off")
+        return true
+    }
+	
 	return false
 }
 
 def handleOff(device, bondId) {
 	logDebug "Handling Off event for ${bondId}"
 
-	if (hasAction(bondId, "TurnOff")) 
-	{
-		if (executeAction(bondId, "TurnOff") && shouldSendEvent(bondId)) 
-		{
-			device.sendEvent(name: "switch", value: "off")
-			if (device.hasCapability("FanControl"))
-				device.sendEvent(name: "speed", value: "off")
-			return true
-		}
-	}
+	
+    if (executeAction(bondId, "TurnOff") && shouldSendEvent(bondId)) 
+    {
+        device.sendEvent(name: "switch", value: "off")
+        if (device.hasCapability("FanControl"))
+        device.sendEvent(name: "speed", value: "off")
+        return true
+    }
+	
 	return false
 }
 
 def handleDirection(device, bondId, direction)
 {
 	logDebug "Handling Direction event for ${bondId}"
-	if (hasAction(bondId, "SetDirection")) 
-	{
-		def bondDirection = 1
-		if (direction == "reverse")
-			bondDirection = -1
-        if (executeAction(bondId, "SetDirection", bondDirection)) 
-		{
-			device.sendEvent(name: "direction", value: direction)
-		}
+
+    def bondDirection = 1
+    if (direction == "reverse")
+    bondDirection = -1
+    if (executeAction(bondId, "SetDirection", bondDirection)) 
+    {
+        device.sendEvent(name: "direction", value: direction)
     }
+    
 }
 
 def getState(bondId) {

@@ -37,3 +37,8 @@ def setSpeed(speed) {
 		state.lastSpeed = speed
     parent.handleFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
 }
+
+def handleLightLevel(device, id, level)
+{
+	parent.handleLightLevel(device, id, level)
+}

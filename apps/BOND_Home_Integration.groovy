@@ -244,7 +244,7 @@ def createChildDevices() {
 			}
 			if (state.fanDetails[fan].contains("TurnUpLightOn") && state.fanDetails[fan].contains("TurnDownLightOn"))
 			{
-				if (state.fanDetails[fan].contains("SetUpLightBrightness") && state.fanDetails[fan].contains("SetDownLightBrightness"))
+				if ((state.fanDetails[fan].contains("SetUpLightBrightness") || state.fanDetails[fan].contains("StartUpLightDimmer")) && (state.fanDetails[fan].contains("SetDownLightBrightness") || state.fanDetails[fan].contains("StartDownLightDimmer")))
 				{
 					if (!fanDevice.getChildDevice("bond:" + fan + ":uplight"))
 						fanDevice.addChildDevice("bond", "BOND Fan Dimmable Light", "bond:" + fan + ":uplight", ["name": state.fanList[fan] + " Up Light", isComponent: true])
@@ -264,7 +264,7 @@ def createChildDevices() {
 			{
 				if (!fanDevice.getChildDevice("bond:" + fan + ":light"))
 				{
-					if (state.fanDetails[fan].contains("SetBrightness"))
+					if (state.fanDetails[fan].contains("SetBrightness") || state.fanDetails[fan].contains("StartDimmer"))
 					{
 						fanDevice.addChildDevice("bond", "BOND Fan Dimmable Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
 					}
@@ -607,27 +607,68 @@ def handleLightOff(device, bondId) {
     }
 }
 
+def dimUsingTimer(device, bondId, level, command)
+{
+	def totalDimmerTime = device.getDataValue("dimmerTime").toInteger()
+	def percentageToDim = level/100.0
+	def dimTime = totalDimmerTime * percentageToDim
+	if (executeAction(bondId, command))
+	{
+		runInMillis(dimTime, stopDimmer, [data: [device: device, bondId: bondId, level: level]])
+	
+	}
+}
+
+def stopDimmer(data)
+{
+	if (executeAction(data.bondId, "Stop"))
+	{
+		data.device.sendEvent(name: "level", value: data.level)
+	}
+}
+
 def handleLightLevel(device, bondId, level) {
 	logDebug "Handling Light Level event for ${bondId}"
 	if (device.deviceNetworkId.contains("uplight"))
 	{
-		if (executeAction(bondId, "SetUpLightBrightness", level)) 
+		if (state.fanDetails[bondId].contains("StartUpLightDimmer"))
 		{
-			device.sendEvent(name: "level", value: level)
+			dimUsingTimer(device, bondId, level, "StartUpLightDimmer")
+		}
+		else
+		{
+			if (executeAction(bondId, "SetUpLightBrightness", level)) 
+			{
+				device.sendEvent(name: "level", value: level)
+			}
 		}
 	}
 	else if (device.deviceNetworkId.contains("downlight"))
 	{
-		if (executeAction(bondId, "SetDownLightBrightness", level)) 
+		if (state.fanDetails[bondId].contains("StartDownLightDimmer"))
 		{
-			device.sendEvent(name: "level", value: level)
+			dimUsingTimer(device, bondId, level, "StartDownLightDimmer")
+		}
+		else
+		{
+			if (executeAction(bondId, "SetDownLightBrightness", level)) 
+			{
+				device.sendEvent(name: "level", value: level)
+			}
 		}
 	}
     else 
 	{
-        if (executeAction(bondId, "SetBrightness", level)) 
+		if (state.fanDetails[bondId].contains("StartDimmer"))
 		{
-			device.sendEvent(name: "level", value: level)
+			dimUsingTimer(device, bondId, level, "StartDimmer")
+		}
+		else
+		{
+			if (executeAction(bondId, "SetBrightness", level)) 
+			{
+				device.sendEvent(name: "level", value: level)
+			}
 		}
     }
 }

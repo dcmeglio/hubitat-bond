@@ -8,6 +8,8 @@
 metadata {
     definition (name: "BOND Fan Dimmable Light", namespace: "bond", author: "dmeglio@gmail.com") {
 		capability "SwitchLevel"
+		capability "Switch"
+        capability "Light"
     }
 	
 	preferences {
@@ -17,6 +19,14 @@ metadata {
 
 def setLevel(level) {
 	parent.handleLightLevel(device, device.deviceNetworkId.split(":")[1], level)
+}
+
+def on() {
+	parent.handleLightOn(device, device.deviceNetworkId.split(":")[1])
+}
+
+def off() {
+    parent.handleLightOff(device, device.deviceNetworkId.split(":")[1])
 }
 
 def installed() {

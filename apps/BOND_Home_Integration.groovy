@@ -614,7 +614,7 @@ def dimUsingTimer(device, bondId, level, command)
 	def dimTime = totalDimmerTime * percentageToDim
 	if (executeAction(bondId, command))
 	{
-		runInMillis(dimTime, stopDimmer, [data: [device: device, bondId: bondId, level: level]])
+		runInMillis(Math.round(dimTime * 1000), stopDimmer, [data: [device: device, bondId: bondId, level: level]])
 	
 	}
 }

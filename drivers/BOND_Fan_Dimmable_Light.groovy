@@ -17,6 +17,9 @@ metadata {
     }
 }
 
+def setLevel(level, duration) {
+	parent.handleLightLevel(device, device.deviceNetworkId.split(":")[1], level)
+}
 def setLevel(level) {
 	parent.handleLightLevel(device, device.deviceNetworkId.split(":")[1], level)
 }

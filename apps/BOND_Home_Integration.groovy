@@ -244,13 +244,20 @@ def createChildDevices() {
 			}
 			if (state.fanDetails[fan].contains("TurnUpLightOn") && state.fanDetails[fan].contains("TurnDownLightOn"))
 			{
-				if ((state.fanDetails[fan].contains("SetUpLightBrightness") || state.fanDetails[fan].contains("StartUpLightDimmer")) && (state.fanDetails[fan].contains("SetDownLightBrightness") || state.fanDetails[fan].contains("StartDownLightDimmer")))
+				if (state.fanDetails[fan].contains("SetUpLightBrightness") && state.fanDetails[fan].contains("SetDownLightBrightness"))
 				{
 					if (!fanDevice.getChildDevice("bond:" + fan + ":uplight"))
 						fanDevice.addChildDevice("bond", "BOND Fan Dimmable Light", "bond:" + fan + ":uplight", ["name": state.fanList[fan] + " Up Light", isComponent: true])
 					if (!fanDevice.getChildDevice("bond:" + fan + ":downlight"))
 						fanDevice.addChildDevice("bond", "BOND Fan Dimmable Light", "bond:" + fan + ":downlight", ["name": state.fanList[fan] + " Down Light", isComponent: true])
 
+				}
+				else if (state.fanDetails[fan].contains("StartUpLightDimmer") && state.fanDetails[fan].contains("StartDownLightDimmer"))
+				{
+					if (!fanDevice.getChildDevice("bond:" + fan + ":uplight"))
+						fanDevice.addChildDevice("bond", "BOND Fan Timer Light", "bond:" + fan + ":uplight", ["name": state.fanList[fan] + " Up Light", isComponent: true])
+					if (!fanDevice.getChildDevice("bond:" + fan + ":downlight"))
+						fanDevice.addChildDevice("bond", "BOND Fan Timer Light", "bond:" + fan + ":downlight", ["name": state.fanList[fan] + " Down Light", isComponent: true])
 				}
 				else
 				{
@@ -264,9 +271,13 @@ def createChildDevices() {
 			{
 				if (!fanDevice.getChildDevice("bond:" + fan + ":light"))
 				{
-					if (state.fanDetails[fan].contains("SetBrightness") || state.fanDetails[fan].contains("StartDimmer"))
+					if (state.fanDetails[fan].contains("SetBrightness"))
 					{
 						fanDevice.addChildDevice("bond", "BOND Fan Dimmable Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
+					}
+					else if (state.fanDetails[fan].contains("StartDimmer"))
+					{
+						fanDevice.addChildDevice("bond", "BOND Fan Timer Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
 					}
 					else
 						fanDevice.addChildDevice("bond", "BOND Fan Light", "bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
@@ -490,6 +501,20 @@ def updateDevices() {
 			def deviceFan = device.getChildDevice("bond:" + fireplaces[i] + ":fan")
 			def deviceLight = device.getChildDevice("bond:" + fireplaces[i] + ":light")
 			
+			if (state.flame > 0 && state.power > 0)
+			{
+				if (state.flame <= 25)
+					device.sendEvent(name: "flame", value: "low")
+				else if (state.flame <= 50)
+					device.sendEvent(name: "flame", value: "medium")
+				else
+					device.sendEvent(name: "flame", value: "high")
+			}
+			else
+			{
+				device.sendEvent(name: "flame", value: "off")
+			}
+			
 			if (state.power > 0)
 			{
 				if (this.getProperty("fireplaceSensor${i}") == null)
@@ -607,70 +632,84 @@ def handleLightOff(device, bondId) {
     }
 }
 
-def dimUsingTimer(device, bondId, level, command)
+def handleDim(device, bondId, duration)
 {
-	def totalDimmerTime = device.getDataValue("dimmerTime").toInteger()
-	def percentageToDim = level/100.0
-	def dimTime = totalDimmerTime * percentageToDim
+	if (device.deviceNetworkId.contains("uplight"))
+	{
+		dimUsingTimer(device, bondId, duration, "StartUpLightDimmer")
+	}
+	else if (device.deviceNetworkId.contains("downlight"))
+	{
+		dimUsingTimer(device, bondId, level, "StartDownLightDimmer")
+	}
+	else
+	{
+		dimUsingTimer(device, bondId, level, "StartDimmer")
+	}
+}
+
+def dimUsingTimer(device, bondId, duration, command)
+{
 	if (executeAction(bondId, command))
 	{
-		runInMillis(Math.round(dimTime * 1000), stopDimmer, [data: [device: device, bondId: bondId, level: level]])
-	
+		runInMillis(duration*1000, stopDimmer, [data: [device: device, bondId: bondId, level: level]])
 	}
 }
 
 def stopDimmer(data)
 {
-	if (executeAction(data.bondId, "Stop"))
-	{
-		data.device.sendEvent(name: "level", value: data.level)
-	}
+	executeAction(data.bondId, "Stop")
 }
 
 def handleLightLevel(device, bondId, level) {
 	logDebug "Handling Light Level event for ${bondId}"
 	if (device.deviceNetworkId.contains("uplight"))
 	{
-		if (state.fanDetails[bondId].contains("StartUpLightDimmer"))
+		if (executeAction(bondId, "SetUpLightBrightness", level)) 
 		{
-			dimUsingTimer(device, bondId, level, "StartUpLightDimmer")
-		}
-		else
-		{
-			if (executeAction(bondId, "SetUpLightBrightness", level)) 
-			{
-				device.sendEvent(name: "level", value: level)
-			}
+			device.sendEvent(name: "level", value: level)
 		}
 	}
 	else if (device.deviceNetworkId.contains("downlight"))
 	{
-		if (state.fanDetails[bondId].contains("StartDownLightDimmer"))
+		if (executeAction(bondId, "SetDownLightBrightness", level)) 
 		{
-			dimUsingTimer(device, bondId, level, "StartDownLightDimmer")
-		}
-		else
-		{
-			if (executeAction(bondId, "SetDownLightBrightness", level)) 
-			{
-				device.sendEvent(name: "level", value: level)
-			}
+			device.sendEvent(name: "level", value: level)
 		}
 	}
     else 
 	{
-		if (state.fanDetails[bondId].contains("StartDimmer"))
+		if (executeAction(bondId, "SetBrightness", level)) 
 		{
-			dimUsingTimer(device, bondId, level, "StartDimmer")
-		}
-		else
-		{
-			if (executeAction(bondId, "SetBrightness", level)) 
-			{
-				device.sendEvent(name: "level", value: level)
-			}
+			device.sendEvent(name: "level", value: level)
 		}
     }
+}
+
+def handleSetFlame(device, bondId, height)
+{
+	logDebug "Handling Flame event for ${bondId}"
+	
+	if (height == "off")
+	{
+		if (handleOff(device, bondId))
+			device.sendEvent(name: "flame", value: "off")
+	}
+	else 
+	{
+		def flameHeight = 0
+		if (height == "low")
+			flameHeight = 1
+		else if (height == "medium")
+			flameHeight = 50
+		else if (height == "high")
+			flameHeight = 100
+			
+		if (executeAction(bondId, "Flame", flameHeight))
+		{
+			device.sendEvent(name: "flame", value: "height")
+		}
+	}
 }
 
 def handleOpen(device, bondId)

@@ -661,6 +661,27 @@ def stopDimmer(data)
 	executeAction(data.bondId, "Stop")
 }
 
+def handleStartDimming(device, bondId)
+{
+	if (device.deviceNetworkId.contains("uplight"))
+	{
+		executeAction(bondId, "StartUpLightDimmer")
+	}
+	else if (device.deviceNetworkId.contains("downlight"))
+	{
+		executeAction(bondId, "StartDownLightDimmer")
+	}
+	else
+	{
+		executeAction(bondId, "StartDimmer")
+	}
+}
+
+def handleStopDimming(device, bondId)
+{
+	executeAction(bondId, "Stop")
+}
+
 def handleLightLevel(device, bondId, level) {
 	logDebug "Handling Light Level event for ${bondId}"
 	if (device.deviceNetworkId.contains("uplight"))

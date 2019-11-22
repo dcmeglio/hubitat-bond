@@ -10,7 +10,7 @@ metadata {
 		capability "Switch"
         capability "Light"
 		
-		command "dim", [[name:"Seconds*", type: "number", description: "Duration" ] ]
+		command "dim", ["number"]
     }
 }
 

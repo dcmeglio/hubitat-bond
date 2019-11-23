@@ -640,11 +640,11 @@ def handleDim(device, bondId, duration)
 	}
 	else if (device.deviceNetworkId.contains("downlight"))
 	{
-		dimUsingTimer(device, bondId, level, "StartDownLightDimmer")
+		dimUsingTimer(device, bondId, duration, "StartDownLightDimmer")
 	}
 	else
 	{
-		dimUsingTimer(device, bondId, level, "StartDimmer")
+		dimUsingTimer(device, bondId, duration, "StartDimmer")
 	}
 }
 

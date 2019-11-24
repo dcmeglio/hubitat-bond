@@ -6,7 +6,12 @@
  */
  
 metadata {
-    definition (name: "BOND Fireplace Light", namespace: "bond", author: "dmeglio@gmail.com") {
+    definition (
+		name: "BOND Fireplace Light", 
+		namespace: "bond", 
+		author: "dmeglio@gmail.com",
+		importUrl: "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fireplace_Light.groovy"
+	) {
 		capability "Switch"
         capability "Light"
     }

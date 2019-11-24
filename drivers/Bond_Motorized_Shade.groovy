@@ -6,7 +6,12 @@
  */
 
 metadata {
-    definition (name: "BOND Motorized Shade", namespace: "bond", author: "dmeglio@gmail.com") {
+    definition (
+		name: "BOND Motorized Shade", 
+		namespace: "bond", 
+		author: "dmeglio@gmail.com",
+		importUrl: "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Motorized_Shade.groovy"
+	) {
         capability "WindowShade"
     }
 }

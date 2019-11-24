@@ -6,7 +6,12 @@
  */
 
 metadata {
-    definition (name: "BOND Fan With Direction", namespace: "bond", author: "dmeglio@gmail.com") {
+    definition (
+		name: "BOND Fan With Direction", 
+		namespace: "bond", 
+		author: "dmeglio@gmail.com",
+		importUrl: "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fan_With_Direction.groovy"
+	) {
 		capability "Switch"
         capability "FanControl"
 		command "setDirection", [[name:"Direction", type: "ENUM", description: "Direction", constraints: ["forward","reverse"] ] ]

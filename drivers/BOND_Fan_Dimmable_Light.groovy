@@ -6,7 +6,12 @@
  */
 
 metadata {
-    definition (name: "BOND Fan Dimmable Light", namespace: "bond", author: "dmeglio@gmail.com") {
+    definition (
+		name: "BOND Fan Dimmable Light", 
+		namespace: "bond", 
+		author: "dmeglio@gmail.com",
+		importUrl: "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fan_Dimmable_Light.groovy"
+	) {
 		capability "SwitchLevel"
 		capability "Switch"
         capability "Light"

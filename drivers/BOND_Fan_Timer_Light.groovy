@@ -6,7 +6,12 @@
  */
 
 metadata {
-    definition (name: "BOND Fan Timer Light", namespace: "bond", author: "dmeglio@gmail.com") {
+    definition (
+		name: "BOND Fan Timer Light", 
+		namespace: "bond", 
+		author: "dmeglio@gmail.com",
+		importUrl: "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fan_Timer_Light.groovy"
+	) {
 		capability "Switch"
         capability "Light"
 

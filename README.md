@@ -2,7 +2,7 @@
 BOND Home Integration for Hubitat. This currently supports fireplaces, fans, and motorized shades.
  
 ## Fans
-Fans currently support on/off, speed settings, direction, and lights (both a single light and up/down lights) as well as dimmable lights.
+Fans currently support on/off, speed settings, direction, and lights (both a single light and up/down lights) as well as dimmable lights. Please note that some fans do not support setting dimmer levels for their lights. These are usually lights where you have to hold the button to dim. The app will recognize these as a "BOND Fan Timer Light" which has custom commands that allow you to start and stop dimming but do not implement the true capability to be detected as a dimmer. This is because there is no way to set these devices to a specific dim level.
  
 ## Fireplaces
 Fireplaces currently support on/off (which can also be optionally monitored by a power meter), flame height adjustment, fan speed settings, and a light.

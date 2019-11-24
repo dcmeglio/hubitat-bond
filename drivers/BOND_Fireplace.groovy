@@ -6,7 +6,12 @@
  */
 
 metadata {
-    definition (name: "BOND Fireplace", namespace: "bond", author: "dmeglio@gmail.com") {
+    definition (
+		name: "BOND Fireplace", 
+		namespace: "bond", 
+		author: "dmeglio@gmail.com",
+		importUrl: "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fireplace.groovy"
+	) {
 		capability "Switch"
 		
 		command "setFlame", [[name:"Height*", type: "ENUM", description: "Flame height", constraints: ["off","low","medium", "high"] ] ]

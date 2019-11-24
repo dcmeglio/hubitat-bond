@@ -652,7 +652,7 @@ def dimUsingTimer(device, bondId, duration, command)
 {
 	if (executeAction(bondId, command))
 	{
-		runInMillis(duration*1000, stopDimmer, [data: [device: device, bondId: bondId, level: level]])
+		runInMillis((duration*1000).toInteger(), stopDimmer, [data: [device: device, bondId: bondId]])
 	}
 }
 

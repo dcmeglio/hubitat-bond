@@ -5,6 +5,9 @@
  *
  *  Copyright 2019 Dominick Meglio
  *
+ * Revision History
+ * v 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
+ *
  */
 
 definition(

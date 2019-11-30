@@ -427,6 +427,8 @@ def updateDevices() {
         def deviceLight = device.getChildDevice("bond:" + fan + ":light")
 		def deviceUpLight = device.getChildDevice("bond:" + fan + ":uplight")
 		def deviceDownLight = device.getChildDevice("bond:" + fan + ":downlight")
+		
+		logDebug "fan state: ${state}"
         if (state.power > 0)
         {
             device.sendEvent(name: "switch", value: "on")
@@ -505,7 +507,7 @@ def updateDevices() {
 			def device = getChildDevice("bond:" + fireplaces[i])
 			def deviceFan = device.getChildDevice("bond:" + fireplaces[i] + ":fan")
 			def deviceLight = device.getChildDevice("bond:" + fireplaces[i] + ":light")
-			
+			logDebug "fireplace state: ${state}"
 			if (state.flame > 0 && state.power > 0)
 			{
 				if (state.flame <= 25)
@@ -564,7 +566,7 @@ def updateDevices() {
 		{
 			def state = getState(shade)
 			def device = getChildDevice("bond:" + shade)
-			
+			logDebug "shade state: ${state}"
 			if (state.open == 1)
 			{
 				device.sendEvent(name: "windowShade", value: "open")

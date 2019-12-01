@@ -734,7 +734,7 @@ def handleSetFlame(device, bondId, height)
 			
 		if (executeAction(bondId, "SetFlame", flameHeight))
 		{
-			device.sendEvent(name: "flame", value: "height")
+			device.sendEvent(name: "flame", value: height)
 		}
 	}
 }

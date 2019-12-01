@@ -48,3 +48,20 @@ def setSpeed(speed) {
 def setDirection(direction) {
 	parent.handleDirection(device, device.deviceNetworkId.split(":")[1], direction)
 }
+
+def handleLightLevel(device, id, level)
+{
+	parent.handleLightLevel(device, id, level)
+}
+
+def handleDim(device, bondId, duration) {
+	parent.handleDim(device, bondId, duration)
+}
+
+def handleStartDimming(device, bondId) {
+	parent.handleStartDimming(device, bondId)
+}
+
+def handleStopDimming(device, bondId) {
+	parent.handleStopDimming(device, bondId)
+}

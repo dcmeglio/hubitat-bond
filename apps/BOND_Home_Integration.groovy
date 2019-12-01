@@ -6,7 +6,7 @@
  *  Copyright 2019 Dominick Meglio
  *
  * Revision History
- * v 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls
+ * v 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
  * v 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
  *
  */
@@ -732,7 +732,7 @@ def handleSetFlame(device, bondId, height)
 		else if (height == "high")
 			flameHeight = 100
 			
-		if (executeAction(bondId, "Flame", flameHeight))
+		if (executeAction(bondId, "SetFlame", flameHeight))
 		{
 			device.sendEvent(name: "flame", value: "height")
 		}

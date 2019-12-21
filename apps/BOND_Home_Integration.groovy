@@ -8,6 +8,7 @@
  * Revision History
  * v 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
  * v 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
+ * v 2019.12.14 - Added support for Switch capability to the motorized shades for compatibility
  *
  */
 

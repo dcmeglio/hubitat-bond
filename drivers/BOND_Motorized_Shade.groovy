@@ -13,6 +13,7 @@ metadata {
 		importUrl: "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Motorized_Shade.groovy"
 	) {
         capability "WindowShade"
+		capability "Switch"
     }
 }
 
@@ -22,4 +23,12 @@ def open() {
 
 def close() {
 	parent.handleClose(device, device.deviceNetworkId.split(":")[1])
+}
+
+def on() {
+	open()
+}
+
+def off() {
+	close()
 }

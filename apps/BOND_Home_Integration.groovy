@@ -775,12 +775,14 @@ def translateBondFanSpeedToHE(max_speeds, speed)
 		3: [3: "high", 2: "medium", 1: "low"],
 		2: [2: "high", 1: "low" ]
 	]
-	logDebug "Translating ${speed} to BOND"
+	
 	if (!speed.toString().isNumber())
 		return speed
 		
 	if (max_speeds > 10 || speed > max_speeds)
 		return 0
+		
+	logDebug "Translating ${speed}:${max_speeds} to BOND ${speedTranslations[max_speeds][speed]}"
 		
 	return speedTranslations[max_speeds][speed]
 }
@@ -806,6 +808,8 @@ def translateHEFanSpeedToBond(max_speeds, speed)
 	
 	if (max_speeds > 10)
 		return null
+		
+	logDebug "Translating ${speed}:${max_speeds} to HE ${speedTranslations[max_speeds][speed]}"
 		
 	return speedTranslations[max_speeds][speed]
 }

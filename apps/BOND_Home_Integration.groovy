@@ -432,7 +432,7 @@ def updateDevices() {
         if (state.power > 0)
         {
             device.sendEvent(name: "switch", value: "on")
-			device.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fanProperties?.getAt(fan)?.max_speed ?: 3, state.speed))
+			device.sendEvent(name: "speed", value: translateBondFanSpeedToHE(fan, state.fanProperties?.getAt(fan)?.max_speed ?: 3, state.speed))
         }
         else
         {
@@ -530,7 +530,7 @@ def updateDevices() {
 				}
 				if (deviceFan)
 				{
-					deviceFan.sendEvent(name: "speed", value: translateBondFanSpeedToHE(state.fireplaceProperties?.getAt(fireplaces[i])?.max_speed ?: 3, state.fpfan_speed))
+					deviceFan.sendEvent(name: "speed", value: translateBondFanSpeedToHE(fireplaces[i], state.fireplaceProperties?.getAt(fireplaces[i])?.max_speed ?: 3, state.fpfan_speed))
 				}
 				
 				if (deviceLight)
@@ -761,7 +761,7 @@ def handleClose(device, bondId)
     }
 }
 
-def translateBondFanSpeedToHE(max_speeds, speed)
+def translateBondFanSpeedToHE(id, max_speeds, speed)
 {
 	def speedTranslations = 
 	[
@@ -782,12 +782,12 @@ def translateBondFanSpeedToHE(max_speeds, speed)
 	if (max_speeds > 10 || speed > max_speeds)
 		return 0
 		
-	logDebug "Translating ${speed}:${max_speeds} to BOND ${speedTranslations[max_speeds][speed]}"
+	logDebug "${id} -> Translating ${speed}:${max_speeds} to HE ${speedTranslations[max_speeds][speed]}"
 		
 	return speedTranslations[max_speeds][speed]
 }
 
-def translateHEFanSpeedToBond(max_speeds, speed)
+def translateHEFanSpeedToBond(id, max_speeds, speed)
 {
 	if (speed.isNumber())
 		return speed.toInteger()
@@ -809,7 +809,7 @@ def translateHEFanSpeedToBond(max_speeds, speed)
 	if (max_speeds > 10)
 		return null
 		
-	logDebug "Translating ${speed}:${max_speeds} to HE ${speedTranslations[max_speeds][speed]}"
+	logDebug "${id} -> Translating ${speed}:${max_speeds} to BOND ${speedTranslations[max_speeds][speed]}"
 		
 	return speedTranslations[max_speeds][speed]
 }
@@ -826,7 +826,7 @@ def handleFanSpeed(device, bondId, speed) {
 		handleOn(device, bondId)
     else
 	{
-        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fanProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
+        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(bondId, state.fanProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
 		{
 			device.sendEvent(name: "switch", value: "on")
 			device.sendEvent(name: "speed", value: speed)
@@ -843,7 +843,7 @@ def handleFPFanSpeed(device, bondId, speed) {
 		handleFPFanOn(device, bondId)
     else
 	{
-        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(state.fireplaceProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
+        if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(bondId, state.fireplaceProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
 		{
 			device.sendEvent(name: "speed", value: speed)
 		}
@@ -970,7 +970,7 @@ def executeAction(bondId, action) {
 		body: "{}"
 	]
 	def isSuccessful = false
-	logDebug "calling action ${action}"
+	logDebug "${bondId} -> calling action ${action}"
 	try
 	{
 		httpPut(params) { resp ->

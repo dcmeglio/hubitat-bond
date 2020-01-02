@@ -436,6 +436,7 @@ def updateDevices() {
         }
         else
         {
+			logDebug "${fan} -> setting off because power is off"
             device.sendEvent(name: "switch", value: "off")
 			device.sendEvent(name: "speed", value: "off")
         }
@@ -820,7 +821,10 @@ def handleFanSpeed(device, bondId, speed) {
 	if (speed == "off")
 	{
 		if (handleOff(device, bondId))
+		{
 			device.sendEvent(name: "speed", value: "off")
+			logDebug "${bondId} -> fan speed set to off so off was sent instead"
+		}
 	}	
 	else if (speed == "on")
 		handleOn(device, bondId)

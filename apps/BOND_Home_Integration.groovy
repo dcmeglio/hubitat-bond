@@ -432,8 +432,8 @@ def updateDevices() {
         if (state.power > 0)
         {
             device.sendEvent(name: "switch", value: "on")
-			logDebug "fan: ${fan} -> properties: ${state.fanProperties?.getAt(fan)} max_speed: ${state.fanProperties?.getAt(fan)?.max_speed}"
-			device.sendEvent(name: "speed", value: translateBondFanSpeedToHE(fan, state.fanProperties?.getAt(fan)?.max_speed ?: 3, state.speed))
+			logDebug "fan: ${fan} -> properties: ${state.fanProperties?.getAt(fan)} max_speed: ${state.fanProperties[fan].max_speed}"
+			device.sendEvent(name: "speed", value: translateBondFanSpeedToHE(fan, state.fanProperties[fan].max_speed ?: 3, state.speed))
         }
         else
         {

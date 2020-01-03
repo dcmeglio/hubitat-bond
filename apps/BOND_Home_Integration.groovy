@@ -9,6 +9,7 @@
  * v 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
  * v 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
  * v 2019.12.14 - Added support for Switch capability to the motorized shades for compatibility
+ * v 2020.01.02 - Fixed an issue where fan speed wouldn't be set properly (thanks jchurch for the troubleshooting!)
  *
  */
 
@@ -424,35 +425,33 @@ def powerMeterEventHandler(evt) {
 
 def updateDevices() {
     for (fan in fans) {
-        def state = getState(fan)
+        def deviceState = getState(fan)
         def device = getChildDevice("bond:" + fan)
         def deviceLight = device.getChildDevice("bond:" + fan + ":light")
 		def deviceUpLight = device.getChildDevice("bond:" + fan + ":uplight")
 		def deviceDownLight = device.getChildDevice("bond:" + fan + ":downlight")
-        if (state.power > 0)
+        if (deviceState.power > 0)
         {
             device.sendEvent(name: "switch", value: "on")
-			logDebug "fan: ${fan} -> ${state.fanProperties} -> properties: ${state.fanProperties?.getAt(fan)}"
-			device.sendEvent(name: "speed", value: translateBondFanSpeedToHE(fan, state.fanProperties[fan].max_speed ?: 3, state.speed))
+			device.sendEvent(name: "speed", value: translateBondFanSpeedToHE(fan, state.fanProperties[fan].max_speed ?: 3, deviceState.speed))
         }
         else
         {
-			logDebug "${fan} -> setting off because power is off"
             device.sendEvent(name: "switch", value: "off")
 			device.sendEvent(name: "speed", value: "off")
         }
         if (deviceLight)
         {
-			if (state.brightness != null)
+			if (deviceState.brightness != null)
 			{
-				if (state.light == 0)
+				if (deviceState.light == 0)
 					deviceLight.sendEvent(name: "level", value: 0)
 				else
-					deviceLight.sendEvent(name: "level", value: state.brightness)
+					deviceLight.sendEvent(name: "level", value: deviceState.brightness)
 			}
 			else
 			{
-				if (state.light > 0)
+				if (deviceState.light > 0)
 					deviceLight.sendEvent(name: "switch", value: "on")
 				else
 					deviceLight.sendEvent(name: "switch", value: "off")
@@ -460,16 +459,16 @@ def updateDevices() {
         }
 		if (deviceUpLight)
 		{
-			if (state.up_light_brightness != null)
+			if (deviceState.up_light_brightness != null)
 			{
-				if (state.up_light == 0)
+				if (deviceState.up_light == 0)
 					deviceUpLight.sendEvent(name: "level", value: 0)
 				else
-					deviceUpLight.sendEvent(name: "level", value: state.up_light_brightness)
+					deviceUpLight.sendEvent(name: "level", value: deviceState.up_light_brightness)
 			}
 			else
 			{
-				if (state.light > 0 && state.up_light > 0)
+				if (deviceState.light > 0 && deviceState.up_light > 0)
 					deviceUpLight.sendEvent(name: "switch", value: "on")
 				else
 					deviceUpLight.sendEvent(name: "switch", value: "off")
@@ -477,16 +476,16 @@ def updateDevices() {
 		}
 		if (deviceDownLight)
 		{
-			if (state.down_light_brightness != null)
+			if (deviceState.down_light_brightness != null)
 			{
-				if (state.down_light == 0)
+				if (deviceState.down_light == 0)
 					deviceDownLight.sendEvent(name: "level", value: 0)
 				else
-					deviceDownLight.sendEvent(name: "level", value: state.down_light_brightness)
+					deviceDownLight.sendEvent(name: "level", value: deviceState.down_light_brightness)
 			}
 			else
 			{
-				if (state.light > 0 && state.down_light > 0)
+				if (deviceState.light > 0 && deviceState.down_light > 0)
 					deviceDownLight.sendEvent(name: "switch", value: "on")
 				else
 					deviceDownLight.sendEvent(name: "switch", value: "off")	
@@ -494,9 +493,9 @@ def updateDevices() {
 		}
 		if (device.hasAttribute("direction"))
 		{
-			if (state.direction == 1)
+			if (deviceState.direction == 1)
 				device.sendEvent(name: "direction", value: "forward")
-			else if (state.direction == -1)
+			else if (deviceState.direction == -1)
 				device.sendEvent(name: "direction", value: "reverse")
 		}
     }
@@ -505,16 +504,16 @@ def updateDevices() {
 	{
 		for (def i = 0; i < fireplaces.size(); i++)
 		{
-			def state = getState(fireplaces[i])
+			def deviceState = getState(fireplaces[i])
 			def device = getChildDevice("bond:" + fireplaces[i])
 			def deviceFan = device.getChildDevice("bond:" + fireplaces[i] + ":fan")
 			def deviceLight = device.getChildDevice("bond:" + fireplaces[i] + ":light")
 			
-			if (state.flame > 0 && state.power > 0)
+			if (deviceState.flame > 0 && deviceState.power > 0)
 			{
-				if (state.flame <= 25)
+				if (deviceState.flame <= 25)
 					device.sendEvent(name: "flame", value: "low")
-				else if (state.flame <= 50)
+				else if (deviceState.flame <= 50)
 					device.sendEvent(name: "flame", value: "medium")
 				else
 					device.sendEvent(name: "flame", value: "high")
@@ -524,7 +523,7 @@ def updateDevices() {
 				device.sendEvent(name: "flame", value: "off")
 			}
 			
-			if (state.power > 0)
+			if (deviceState.power > 0)
 			{
 				if (this.getProperty("fireplaceSensor${i}") == null)
 				{
@@ -532,12 +531,12 @@ def updateDevices() {
 				}
 				if (deviceFan)
 				{
-					deviceFan.sendEvent(name: "speed", value: translateBondFanSpeedToHE(fireplaces[i], state.fireplaceProperties?.getAt(fireplaces[i])?.max_speed ?: 3, state.fpfan_speed))
+					deviceFan.sendEvent(name: "speed", value: translateBondFanSpeedToHE(fireplaces[i], state.fireplaceProperties?.getAt(fireplaces[i])?.max_speed ?: 3, deviceState.fpfan_speed))
 				}
 				
 				if (deviceLight)
 				{
-					if (state.light == 1)
+					if (deviceState.light == 1)
 						deviceLight.sendEvent(name: "switch", value: "on")
 					else
 						deviceLight.sendEvent(name: "switch", value: "off")
@@ -566,10 +565,10 @@ def updateDevices() {
 	{
 		for (shade in shades)
 		{
-			def state = getState(shade)
+			def deviceState = getState(shade)
 			def device = getChildDevice("bond:" + shade)
 			
-			if (state.open == 1)
+			if (deviceState.open == 1)
 			{
 				device.sendEvent(name: "windowShade", value: "open")
 			}
@@ -824,7 +823,6 @@ def handleFanSpeed(device, bondId, speed) {
 		if (handleOff(device, bondId))
 		{
 			device.sendEvent(name: "speed", value: "off")
-			logDebug "${bondId} -> fan speed set to off so off was sent instead"
 		}
 	}	
 	else if (speed == "on")

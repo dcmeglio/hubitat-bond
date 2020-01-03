@@ -570,10 +570,12 @@ def updateDevices() {
 			
 			if (deviceState.open == 1)
 			{
+				device.sendEvent(name: "switch", value: "on")
 				device.sendEvent(name: "windowShade", value: "open")
 			}
 			else
 			{
+				device.sendEvent(name: "switch", value: "off")
 				device.sendEvent(name: "windowShade", value: "closed")
 			}
 		}

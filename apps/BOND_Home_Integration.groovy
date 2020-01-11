@@ -322,7 +322,7 @@ def createChildDevices() {
 			def genericDevice = getChildDevice("bond:" + generic)
 			if (!genericDevice)
             {
-				genericDevice = addChildDevice("bond", "BOND Generic Device", "bond:" + shade, 1234, ["name": state.genericList[genericDevice], isComponent: false])
+				genericDevice = addChildDevice("bond", "BOND Generic Device", "bond:" + generic, 1234, ["name": state.genericList[generic], isComponent: false])
 			}
 		}
 	}

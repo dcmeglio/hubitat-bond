@@ -59,6 +59,8 @@ def prefListDevices() {
 					input(name: "fans", type: "enum", title: "Fans", required:false, multiple:true, options:state.fanList, hideWhenEmpty: true)
 				if (state.shadeList.size() > 0)
 					input(name: "shades", type: "enum", title: "Shades", required:false, multiple:true, options:state.shadeList, hideWhenEmpty: true)
+				if (state.genericList.size() > 0)
+					input(name: "genericDevices", type: "enum", title: "Generic Devices", required:false, multiple:true, options:state.genericList, hideWhenEmpty: true)
 			}
 		}
 	}
@@ -122,6 +124,8 @@ def getDevices() {
 	state.shadeList = [:]
 	state.shadeDetails = [:]
 	state.shadeProperties = [:]
+	state.genericList = [:]
+	state.genericDetails = [:]
 	state.deviceList = [:]
 	def params = [
 		uri: "http://${hubIp}",
@@ -181,6 +185,11 @@ def getDeviceById(id) {
 					state.shadeList[id.key] = resp.data.name
 					state.shadeDetails[id.key] = resp.data.actions
 					state.shadeProperties[id.key] = getDeviceProperties(id)
+				}
+				else if (resp.data.type == "GX")
+				{
+					state.genericList[id.key] = resp.data.name
+					state.genericDetails[id.key] = resp.data.actions
 				}
 			}
 		}
@@ -305,6 +314,18 @@ def createChildDevices() {
 			}
 		}
 	}
+	
+	if (genericDevices != null)
+	{
+		for (generic in genericDevices)
+		{
+			def genericDevice = getChildDevice("bond:" + generic)
+			if (!genericDevice)
+            {
+				genericDevice = addChildDevice("bond", "BOND Generic Device", "bond:" + generic, 1234, ["name": state.genericList[generic], isComponent: false])
+			}
+		}
+	}
 }
 
 def cleanupChildDevices()
@@ -342,6 +363,17 @@ def cleanupChildDevices()
 		for (shade in shades)
 		{
 			if (shade == deviceId)
+			{
+				deviceFound = true
+				break
+			}
+		}
+		if (deviceFound == true)
+			continue
+			
+		for (generic in genericDevices)
+		{
+			if (generic == deviceId)
 			{
 				deviceFound = true
 				break
@@ -577,6 +609,24 @@ def updateDevices() {
 			{
 				device.sendEvent(name: "switch", value: "off")
 				device.sendEvent(name: "windowShade", value: "closed")
+			}
+		}
+	}
+	
+	if (genericDevices != null)
+	{
+		for (generic in genericDevices)
+		{
+			def deviceState = getState(generic)
+			def device = getChildDevice("bond:" + generic)
+			
+			if (deviceState.power > 0)
+			{
+				device.sendEvent(name: "switch", value: "on")
+			}
+			else
+			{
+				device.sendEvent(name: "switch", value: "off")
 			}
 		}
 	}

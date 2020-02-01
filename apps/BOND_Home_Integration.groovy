@@ -10,6 +10,7 @@
  * v 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
  * v 2019.12.14 - Added support for Switch capability to the motorized shades for compatibility
  * v 2020.01.02 - Fixed an issue where fan speed wouldn't be set properly (thanks jchurch for the troubleshooting!)
+ * v 2020.02.01 - Fixed an issue where looking for devices was incorrect which broke Smart By BOND devices (thanks mcneillk for the fix!)
  *
  */
 
@@ -159,7 +160,7 @@ def getDevices() {
 def getDeviceById(id) {
 	def params = [
 		uri: "http://${hubIp}",
-		path: "/v2/devices/${id}",
+		path: "/v2/devices/${id.key}",
 		contentType: "application/json",
 		headers: [ 'BOND-Token': hubToken ]
 	]
@@ -203,7 +204,7 @@ def getDeviceById(id) {
 def getDeviceProperties(id) {
 	def params = [
 		uri: "http://${hubIp}",
-		path: "/v2/devices/${id}/properties",
+		path: "/v2/devices/${id.key}/properties",
 		contentType: "application/json",
 		headers: [ 'BOND-Token': hubToken ]
 	]

@@ -83,7 +83,7 @@ def fixDirection(direction) {
 }
 
 def fixLightPower(device, bondId, power) {
-	parent.fixFanSpeed(device, bondId, power)
+	parent.fixLightPower(device, bondId, power)
 }
 
 def fixLightLevel(device, bondId, level) {

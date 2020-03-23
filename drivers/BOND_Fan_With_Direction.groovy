@@ -81,3 +81,11 @@ def fixSpeed(speed) {
 def fixDirection(direction) {
 	parent.fixDirection(device, device.deviceNetworkId.split(":")[1], direction)
 }
+
+def fixLightPower(device, bondId, power) {
+	parent.fixFanSpeed(device, bondId, power)
+}
+
+def fixLightLevel(device, bondId, level) {
+	parent.fixLightLevel(device, bondId, level)
+}

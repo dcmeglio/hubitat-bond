@@ -70,3 +70,11 @@ def fixPower(power) {
 def fixSpeed(speed) {
 	parent.fixFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
 }
+
+def fixLightPower(device, bondId, power) {
+	parent.fixFanSpeed(device, bondId, power)
+}
+
+def fixLightLevel(device, bondId, level) {
+	parent.fixLightLevel(device, bondId, level)
+}

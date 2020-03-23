@@ -1,7 +1,7 @@
 /**
- *  BOND Fireplace Fan
+ *  BOND Fan Light
  *
- *  Copyright 2019 Dominick Meglio
+ *  Copyright 2019-2020 Dominick Meglio
  *
  */
 
@@ -14,6 +14,8 @@ metadata {
 	) {
 		capability "Switch"
         capability "Light"
+		
+		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
     }
 }
 
@@ -25,3 +27,6 @@ def off() {
     parent.handleLightOff(device, device.deviceNetworkId.split(":")[1])
 }
 
+def fixPower(power) {
+	parent.fixLightPower(device, device.deviceNetworkId.split(":")[1], power)
+}

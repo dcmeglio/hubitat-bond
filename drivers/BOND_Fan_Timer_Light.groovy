@@ -19,6 +19,8 @@ metadata {
 		command "dim", ["number"]
 		command "startDimming"
 		command "stopDimming"
+		
+		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
     }
 }
 
@@ -48,4 +50,8 @@ def installed() {
 
 def updated() {
 	sendEvent(name: "numberOfButtons", value: "1")
+}
+
+def fixPower(power) {
+	parent.fixLightPower(device, device.deviceNetworkId.split(":")[1], power)
 }

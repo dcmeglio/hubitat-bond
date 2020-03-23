@@ -1,7 +1,7 @@
 /**
  *  BOND Fan
  *
- *  Copyright 2019 Dominick Meglio
+ *  Copyright 2019-2020 Dominick Meglio
  *
  */
 
@@ -14,6 +14,9 @@ metadata {
 	) {
 		capability "Switch"
         capability "FanControl"
+		
+		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
+		command "fixSpeed", [[name:"Speed*", type: "ENUM", description: "Speed", constraints: ["off","low", "medium-low", "medium", "medium-high", "high", "on"] ] ]
     }
 }
 
@@ -58,4 +61,12 @@ def handleStartDimming(device, bondId) {
 
 def handleStopDimming(device, bondId) {
 	parent.handleStopDimming(device, bondId)
+}
+
+def fixPower(power) {
+	parent.fixPowerState(device, device.deviceNetworkId.split(":")[1], power)
+}
+
+def fixSpeed(speed) {
+	parent.fixFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
 }

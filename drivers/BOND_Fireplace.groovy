@@ -1,7 +1,7 @@
 /**
- *  BOND Fireplace Fan
+ *  BOND Fireplace
  *
- *  Copyright 2019 Dominick Meglio
+ *  Copyright 2019-2020 Dominick Meglio
  *
  */
 
@@ -16,6 +16,9 @@ metadata {
 		
 		command "setFlame", [[name:"Height*", type: "ENUM", description: "Flame height", constraints: ["off","low","medium", "high"] ] ]
 		attribute "flame", "string"
+		
+		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
+		command "fixFlame", [[name:"Height*", type: "ENUM", description: "Flame height", constraints: ["off","low","medium", "high"] ] ]
     }
 }
 
@@ -49,4 +52,27 @@ def handleFPFanOn(device, id) {
 
 def handleFPFanOff(device, id) {
     parent.handleFPFanOff(device, id)
+}
+
+def fixPower(power) {
+	parent.fixPowerState(device, device.deviceNetworkId.split(":")[1], power)
+}
+
+def fixFlame(flame) {
+	parent.fixFlameState(device, device.deviceNetworkId.split(":")[1], flame)
+}
+
+def fixFPFanPower(device, id, state)
+{
+	parent.fixFPFanPower(device, device.deviceNetworkId.split(":")[1], state)
+}
+
+def fixFPFanSpeed(device, id, state)
+{
+	parent.fixFPFanSpeed(device, device.deviceNetworkId.split(":")[1], state)
+}
+
+def fixLightPower(device, id, state)
+{
+	parent.fixLightPower(device, device.deviceNetworkId.split(":")[1], state)
 }

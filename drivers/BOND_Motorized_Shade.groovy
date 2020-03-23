@@ -1,7 +1,7 @@
 /**
  *  BOND Motorized Shade
  *
- *  Copyright 2019 Dominick Meglio
+ *  Copyright 2019-2020 Dominick Meglio
  *
  */
 
@@ -14,6 +14,7 @@ metadata {
 	) {
         capability "WindowShade"
 		capability "Switch"
+		command "fixShade", [[name:"Shade*", type: "ENUM", description: "Shade", constraints: ["open","close"] ] ]
     }
 }
 
@@ -31,4 +32,8 @@ def on() {
 
 def off() {
 	close()
+}
+
+def fixShade(shade) {
+	parent.fixShadeState(device, device.deviceNetworkId.split(":")[1], shade)
 }

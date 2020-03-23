@@ -1,7 +1,7 @@
 /**
  *  BOND Fireplace Fan
  *
- *  Copyright 2019 Dominick Meglio
+ *  Copyright 2019-2020 Dominick Meglio
  *
  */
 
@@ -14,6 +14,9 @@ metadata {
 	) {
 		capability "FanControl"
 		capability "Switch"
+		
+		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
+		command "fixSpeed", [[name:"Speed*", type: "ENUM", description: "Speed", constraints: ["off","low", "medium-low", "medium", "medium-high", "high", "on"] ] ]
     }
 }
 
@@ -27,4 +30,12 @@ def on() {
 
 def off () {
 	parent.handleFPFanOff(device, device.deviceNetworkId.split(":")[1])
+}
+
+def fixPower(power) {
+	parent.fixFPFanPower(device, device.deviceNetworkId.split(":")[1], power)
+}
+
+def fixSpeed(speed) {
+	parent.fixFPFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
 }

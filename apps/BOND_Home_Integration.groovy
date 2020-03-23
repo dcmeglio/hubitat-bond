@@ -3,7 +3,7 @@
  *
  *  BOND Home Integration
  *
- *  Copyright 2019 Dominick Meglio
+ *  Copyright 2019-2020 Dominick Meglio
  *
  * Revision History
  * v 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
@@ -11,6 +11,7 @@
  * v 2019.12.14 - Added support for Switch capability to the motorized shades for compatibility
  * v 2020.01.02 - Fixed an issue where fan speed wouldn't be set properly (thanks jchurch for the troubleshooting!)
  * v 2020.02.01 - Fixed an issue where looking for devices was incorrect which broke Smart By BOND devices (thanks mcneillk for the fix!)
+ * v 2020.03.23 - Added the ability to fix device state when it's out of sync (thanks stephen_nutt for the suggestion)
  *
  */
 
@@ -647,14 +648,14 @@ def handleLightOn(device, bondId) {
     logDebug "Handling Light On event for ${bondId}"
 	if (device.deviceNetworkId.contains("uplight"))
 	{
-	        if (executeAction(bondId, "TurnUpLightOn")) 
+		if (executeAction(bondId, "TurnUpLightOn")) 
 		{
 			device.sendEvent(name: "switch", value: "on")
 		}
 	}
 	else if (device.deviceNetworkId.contains("downlight"))
 	{
-	        if (executeAction(bondId, "TurnDownLightOn")) 
+		if (executeAction(bondId, "TurnDownLightOn")) 
 		{
 			device.sendEvent(name: "switch", value: "on")
 		}
@@ -812,6 +813,246 @@ def handleClose(device, bondId)
     if (executeAction(bondId, "Close")) 
     {
         device.sendEvent(name: "windowShade", value: "closed")
+    }
+}
+
+def fixPowerState(device, bondId, state) 
+{
+	logDebug "Setting power state for ${bondId} to ${state}"
+	
+	def power
+	if (state == "on")
+		power = 1
+	else 
+		power = 0
+
+	if (executeFixState(bondId, '{"power": ' + power + '}'))
+    {
+		if (power == 1)
+			device.sendEvent(name: "switch", value: "on")
+		else
+		{
+			device.sendEvent(name: "switch", value: "off")
+			if (device.hasAttribute("speed"))
+				device.sendEvent(name: "speed", value: "off")
+			if (device.hasAttribute("flame"))
+				device.sendEvent(name: "flame", value: "off")
+		}
+    }
+}
+
+def fixFlameState(device, bondId, state) 
+{
+	logDebug "Setting flame state for ${bondId} to ${state}"
+	
+	def flameHeight = 0
+	if (height == "low")
+		flameHeight = 1
+	else if (height == "medium")
+		flameHeight = 50
+	else if (height == "high")
+		flameHeight = 100
+
+	if (executeFixState(bondId, '{"flame": ' + flameHeight + '}'))
+    {
+		device.sendEvent(name: "flame", value: height)
+    }
+}
+
+def fixFanSpeed(device, bondId, fanState) 
+{
+	def speed = translateHEFanSpeedToBond(bondId, state.fanProperties?.getAt(bondId)?.max_speed ?: 3, fanState)
+	logDebug "Setting fan speed for ${bondId} to ${fanState}"
+
+	if (fanState == "off") 
+	{
+		if (executeFixState(bondId, '{"power": 0}'))
+		{
+			device.sendEvent(name: "speed", value: "off")
+		}
+	}
+	else 
+	{
+		if (executeFixState(bondId, '{"speed": ' + speed + '}'))
+		{
+			device.sendEvent(name: "speed", value: fanState)
+		}
+    }
+}
+
+def fixShadeState(device, bondId, state) 
+{
+	logDebug "Setting shade state for ${bondId} to ${state}"
+
+	def open
+	if (state == "open")
+		open = 1
+	else
+		open = 0
+		
+	if (executeFixState(bondId, '{"open": ' + open + '}'))
+    {
+		if (open == 1)
+		{
+			device.sendEvent(name: "switch", value: "on")
+			device.sendEvent(name: "windowShade", value: "open")
+		}
+		else
+		{
+			device.sendEvent(name: "switch", value: "off")
+			device.sendEvent(name: "windowShade", value: "closed")
+		}
+    }
+}
+
+def fixDirection(device, bondId, state) 
+{
+	logDebug "Setting direction state for ${bondId} to ${state}"
+
+	def direction
+	if (state == "forward")
+		direction = 1
+	else
+		direction = -1
+		
+	if (executeFixState(bondId, '{"direction": ' + direction + '}'))
+    {
+		if (direction == 1)
+		{
+			device.sendEvent(name: "direction", value: "forward")
+		}
+		else
+		{
+			device.sendEvent(name: "direction", value: "reverse")
+		}
+    }
+}
+
+def fixFPFanPower(device, bondId, state) 
+{
+	logDebug "Setting FP fan power state for ${bondId} to ${state}"
+
+	def fppower
+	if (state == "on")
+		fppower = 1
+	else
+		fppower = 0
+		
+	if (executeFixState(bondId, '{"fpfan_power": ' + fppower + '}'))
+    {
+		if (fppower == 1)
+		{
+			device.sendEvent(name: "switch", value: "on")
+			device.sendEvent(name: "speed", value: "on")
+		}
+		else
+		{
+			device.sendEvent(name: "switch", value: "off")
+			device.sendEvent(name: "speed", value: "off")
+		}
+    }
+}
+
+def fixFPFanSpeed(device, bondId, fanState) 
+{
+	logDebug "Setting FP fan speed state for ${bondId} to ${fanState}"
+	
+	def speed = translateHEFanSpeedToBond(bondId, state.fireplaceProperties?.getAt(bondId)?.max_speed ?: 3, fanState)
+
+	if (fanState == "off") 
+	{
+		if (executeFixState(bondId, '{"fpfan_power": 0}'))
+		{
+			device.sendEvent(name: "speed", value: "off")
+			device.sendEvent(name: "switch", value: "off")
+		}
+	}
+	else 
+	{
+		if (executeFixState(bondId, '{"fpfan_speed": ' + speed + '}'))
+		{
+			device.sendEvent(name: "speed", value: fanState)
+			device.sendEvent(name: "switch", value: "on")
+		}
+    }
+}
+
+def fixLightPower(device, bondId, state) {
+    logDebug "Setting light state for ${bondId} to ${state}"
+	
+	def power
+	if (state == "on")
+		power = 1
+	else
+		power = 0
+		
+	if (device.deviceNetworkId.contains("uplight"))
+	{
+		if (executeFixState(bondId, '{"up_light": ' + power + '}'))
+		{
+			device.sendEvent(name: "switch", value: state)
+		}
+	}
+	else if (device.deviceNetworkId.contains("downlight"))
+	{
+		if (executeFixState(bondId, '{"down_light": ' + power + '}'))
+		{
+			device.sendEvent(name: "switch", value: state)
+		}
+	}
+    else
+	{
+        if (executeFixState(bondId, '{"light": ' + power + '}'))
+		{
+			device.sendEvent(name: "switch", value: state)
+		}
+    }
+}
+
+def fixLightLevel(device, bondId, state) {
+	logDebug "Setting light level for ${bondId} to ${state}"
+	
+	if (device.deviceNetworkId.contains("uplight"))
+	{
+		if (executeFixState(bondId, '{"up_light_brightness": ' + state + '}')) 
+		{
+			device.sendEvent(name: "level", value: state)
+		}
+		if (state == 0)
+		{
+			if (executeFixState(bondId, '{"up_light": 0}')) 
+			{
+				device.sendEvent(name: "switch", value: "off")
+			}
+		}
+	}
+	else if (device.deviceNetworkId.contains("downlight"))
+	{
+		if (executeFixState(bondId, '{"down_light_brightness": ' + state + '}'))
+		{
+			device.sendEvent(name: "level", value: state)
+		}
+		if (state == 0)
+		{
+			if (executeFixState(bondId, '{"down_light": 0}')) 
+			{
+				device.sendEvent(name: "switch", value: "off")
+			}
+		}
+	}
+    else 
+	{
+		if (executeFixState(bondId, '{"brightness": ' + state + '}'))
+		{
+			device.sendEvent(name: "level", value: state)
+		}
+		if (state == 0)
+		{
+			if (executeFixState(bondId, '{"light": 0}')) 
+			{
+				device.sendEvent(name: "switch", value: "off")
+			}
+		}
     }
 }
 
@@ -1063,6 +1304,29 @@ def executeAction(bondId, action, argument) {
 	return isSuccessful
 }
 
+def executeFixState(bondId, body) {
+	def params = [
+		uri: "http://${hubIp}",
+		path: "/v2/devices/${bondId}/state",
+		contentType: "application/json",
+		headers: [ 'BOND-Token': hubToken ],
+		body: body
+	]
+	def isSuccessful = false
+	logDebug "calling fix state ${params.body}"
+	try
+	{
+		httpPatch(params) { resp ->
+			isSuccessful = checkHttpResponse("executeFixState", resp)
+		}
+	}
+	catch (e) 
+	{
+		checkHttpResponse("executeFixState", e.getResponse())
+	}
+	return isSuccessful
+}
+
 def shouldSendEvent(bondId) {
 	for (fan in fans) 
 	{
@@ -1086,9 +1350,9 @@ def shouldSendEvent(bondId) {
 }
 
 def logDebug(msg) {
-    if (settings?.debugOutput) {
+   // if (settings?.debugOutput) {
 		log.debug msg
-	}
+	//}
 }
 
 def checkHttpResponse(action, resp) {

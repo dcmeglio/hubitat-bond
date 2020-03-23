@@ -1350,9 +1350,9 @@ def shouldSendEvent(bondId) {
 }
 
 def logDebug(msg) {
-   // if (settings?.debugOutput) {
+    if (settings?.debugOutput) {
 		log.debug msg
-	//}
+	}
 }
 
 def checkHttpResponse(action, resp) {

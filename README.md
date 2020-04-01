@@ -38,3 +38,14 @@ If you chose any fireplaces and you have power meters setup, you will optionally
 
 ## Limitations
 * Only supports a single BOND hub per app installation
+
+## Donations
+If you find this app useful, please consider making a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7LBRPJRLJSDDN&source=url)! 
+
+## Revision History
+* 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
+* 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
+* 2019.12.14 - Added support for Switch capability to the motorized shades for compatibility
+* 2020.01.02 - Fixed an issue where fan speed wouldn't be set properly (thanks jchurch for the troubleshooting!)
+* 2020.02.01 - Fixed an issue where looking for devices was incorrect which broke Smart By BOND devices (thanks mcneillk for the fix!)
+* 2020.03.23 - Added the ability to fix device state when it's out of sync (thanks stephen_nutt for the suggestion)

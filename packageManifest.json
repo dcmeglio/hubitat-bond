@@ -58,7 +58,7 @@
 		},
 		{
 			"id": "74eaecfb-abb9-45e4-b890-e02e8efeca89",
-			"name": "BOND Fan Dimmable Light
+			"name": "BOND Fan Dimmable Light",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fan_Dimmable_Light.groovy",
 			"required": true
 		},

@@ -11,6 +11,7 @@
 			"name": "BOND Home Integration",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/apps/BOND_Home_Integration.groovy",
 			"required": true,
+			"oauth": true,
 			"dependencies" : ["163f6821-e8a7-48fc-8e66-cd787cfe54eb","2ee51ac2-a006-4f87-bc61-e6eed7f280b0","06f5cfc7-ae1b-4d0f-9d2a-8ab38754e86d","15e6d172-2f77-4dc6-8914-936e392036bd","b508d141-e908-45f7-82c3-fa23c83dc6da","c84c35cb-986f-4541-a9bd-07eb1a31fad6","95734752-21b1-4d73-bfeb-e106ada30f77","74eaecfb-abb9-45e4-b890-e02e8efeca89","ae715f3d-fc63-44d0-883d-ac9e4feddf80","238e0515-4059-46f0-aa37-662fa7ecefec"]
 		}
 	],

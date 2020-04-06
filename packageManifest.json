@@ -48,31 +48,31 @@
 			"id": "c84c35cb-986f-4541-a9bd-07eb1a31fad6",
 			"name": "BOND Fan Light",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fan_Light.groovy",
-			"required": true
+			"required": false
 		},
 		{
 			"id": "95734752-21b1-4d73-bfeb-e106ada30f77",
 			"name": "BOND Fan Timer Light",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fan_Timer_Light.groovy",
-			"required": true
+			"required": false
 		},
 		{
 			"id": "74eaecfb-abb9-45e4-b890-e02e8efeca89",
 			"name": "BOND Fan Dimmable Light",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fan_Dimmable_Light.groovy",
-			"required": true
+			"required": false
 		},
 		{
 			"id": "ae715f3d-fc63-44d0-883d-ac9e4feddf80",
 			"name": "BOND Fireplace Fan",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fireplace_Fan.groovy",
-			"required": true
+			"required": false
 		},
 		{
 			"id": "238e0515-4059-46f0-aa37-662fa7ecefec",
 			"name": "BOND Fireplace Light",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fireplace_Light.groovy",
-			"required": true
+			"required": false
 		}
 	]
 }

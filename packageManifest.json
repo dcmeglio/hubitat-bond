@@ -3,7 +3,7 @@
 	"packageId": "b285dc8e-a493-4289-89b8-3606ae81cc01",
 	"minimumHEVersion": "2.1.9",
 	"author": "Dominick Meglio",
-	"version": "1.5",
+	"version": "1.0",
 	"dateReleased": "2020-04-04",
 	"apps" : [
 		{
@@ -11,8 +11,7 @@
 			"name": "BOND Home Integration",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/apps/BOND_Home_Integration.groovy",
 			"required": true,
-			"oauth": true,
-			"version": "1.1"
+			"oauth": true
 		}
 	],
 	"drivers" : [
@@ -20,8 +19,7 @@
 			"id": "163f6821-e8a7-48fc-8e66-cd787cfe54eb",
 			"name": "BOND Fan",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fan.groovy",
-			"required": true,
-			"version": "1.1"
+			"required": true
 		},
 		{
 			"id": "2ee51ac2-a006-4f87-bc61-e6eed7f280b0",

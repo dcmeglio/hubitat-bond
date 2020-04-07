@@ -12,7 +12,7 @@
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/apps/BOND_Home_Integration.groovy",
 			"required": true,
 			"oauth": true,
-			version: "1.0"
+			"version": "1.0"
 		}
 	],
 	"drivers" : [
@@ -21,7 +21,7 @@
 			"name": "BOND Fan",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/drivers/BOND_Fan.groovy",
 			"required": true,
-			version: "1.0"
+			"version": "1.0"
 		},
 		{
 			"id": "2ee51ac2-a006-4f87-bc61-e6eed7f280b0",

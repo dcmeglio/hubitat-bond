@@ -1,6 +1,5 @@
 {
 	"packageName": "BOND Home Integration",
-	"packageId": "b285dc8e-a493-4289-89b8-3606ae81cc01",
 	"minimumHEVersion": "2.1.9",
 	"author": "Dominick Meglio",
 	"version": "1.0",
@@ -10,8 +9,7 @@
 			"id" : "bf7d70fb-1fa9-436f-9cfc-fb8520cda22a",
 			"name": "BOND Home Integration",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/apps/BOND_Home_Integration.groovy",
-			"required": true,
-			"oauth": true
+			"required": true
 		}
 	],
 	"drivers" : [

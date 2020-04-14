@@ -2,8 +2,9 @@
 	"packageName": "BOND Home Integration",
 	"minimumHEVersion": "2.1.9",
 	"author": "Dominick Meglio",
-	"version": "1.0",
-	"dateReleased": "2020-04-04",
+	"version": "1.1.0",
+	"dateReleased": "2020-04-13",
+	releaseNotes: "Added a stop command to motorized shades to stop an open or closed part way through.",
 	"apps" : [
 		{
 			"id" : "bf7d70fb-1fa9-436f-9cfc-fb8520cda22a",

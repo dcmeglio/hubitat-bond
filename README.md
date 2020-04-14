@@ -49,3 +49,4 @@ If you find this app useful, please consider making a [donation](https://www.pay
 * 2020.01.02 - Fixed an issue where fan speed wouldn't be set properly (thanks jchurch for the troubleshooting!)
 * 2020.02.01 - Fixed an issue where looking for devices was incorrect which broke Smart By BOND devices (thanks mcneillk for the fix!)
 * 2020.03.23 - Added the ability to fix device state when it's out of sync (thanks stephen_nutt for the suggestion)
+* 2020.04.13 - Added a stop command to motorized shades to stop an open/close at the current position (suggested by jchurch)

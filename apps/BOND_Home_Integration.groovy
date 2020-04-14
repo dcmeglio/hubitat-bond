@@ -12,6 +12,7 @@
  * v 2020.01.02 - Fixed an issue where fan speed wouldn't be set properly (thanks jchurch for the troubleshooting!)
  * v 2020.02.01 - Fixed an issue where looking for devices was incorrect which broke Smart By BOND devices (thanks mcneillk for the fix!)
  * v 2020.03.23 - Added the ability to fix device state when it's out of sync (thanks stephen_nutt for the suggestion)
+ * v 2020.04.13 - Added a stop command to motorized shades to stop an open/close at the current position (suggested by jchurch)
  *
  */
 
@@ -804,7 +805,6 @@ def handleOpen(device, bondId)
     {
         device.sendEvent(name: "windowShade", value: "open")
     }
-    
 }
 
 def handleClose(device, bondId)
@@ -815,6 +815,13 @@ def handleClose(device, bondId)
     {
         device.sendEvent(name: "windowShade", value: "closed")
     }
+}
+
+def handleStop(device, bondId)
+{
+	logDebug "Handling Stop event for ${bondId}"
+	
+    executeAction(bondId, "Hold")
 }
 
 def fixPowerState(device, bondId, state) 

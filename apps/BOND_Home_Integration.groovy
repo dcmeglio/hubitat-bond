@@ -13,6 +13,7 @@
  * v 2020.02.01 - Fixed an issue where looking for devices was incorrect which broke Smart By BOND devices (thanks mcneillk for the fix!)
  * v 2020.03.23 - Added the ability to fix device state when it's out of sync (thanks stephen_nutt for the suggestion)
  * v 2020.04.13 - Added a stop command to motorized shades to stop an open/close at the current position (suggested by jchurch)
+ * v 2020.04.21 - Added better logging for connection issues to the hub
  *
  */
 
@@ -41,6 +42,7 @@ def prefHub() {
 			input("hubToken", "text", title: "BOND Hub Token", description: "BOND Hub Token")
             input("debugOutput", "bool", title: "Enable debug logging?", defaultValue: true, displayDuringSetup: false, required: false)
 		}
+		displayFooter()
 	}
 }
 
@@ -51,6 +53,7 @@ def prefListDevices() {
 			section("Error") {
 				paragraph "Unable to retrieve devices. Please verify your BOND Hub ID and Token"
 			}
+			displayFooter()
 		}
 	}
 	else
@@ -66,6 +69,7 @@ def prefListDevices() {
 				if (state.genericList.size() > 0)
 					input(name: "genericDevices", type: "enum", title: "Generic Devices", required:false, multiple:true, options:state.genericList, hideWhenEmpty: true)
 			}
+			displayFooter()
 		}
 	}
 }
@@ -84,6 +88,7 @@ def prefPowerSensors() {
 				}
 			}
 		}
+		displayFooter()
 	}
 }
 
@@ -1226,7 +1231,11 @@ def getState(bondId) {
 				stateToReturn = resp.data
 		}
 	}
-	catch (e)
+	catch (org.apache.http.conn.ConnectTimeoutException e)
+	{
+		log.error "getState: connection to BOND hub appears to be down. Check if the IP is correct."
+	}
+	catch (Exception e)
 	{
 		checkHttpResponse("getState", e.getResponse())
 	}
@@ -1259,7 +1268,11 @@ def hasAction(bondId, commandType) {
 			}
 		}
 	}
-	catch (e)
+	catch (org.apache.http.conn.ConnectTimeoutException e)
+	{
+		log.error "hasAction: connection to BOND hub appears to be down. Check if the IP is correct."
+	}
+	catch (Exception e)
 	{
 		checkHttpResponse("hasAction", e.getResponse())
 	}
@@ -1282,7 +1295,11 @@ def executeAction(bondId, action) {
 			isSuccessful = checkHttpResponse("executeAction", resp)
 		}
 	}
-	catch (e) 
+	catch (org.apache.http.conn.ConnectTimeoutException e)
+	{
+		log.error "executeAction: connection to BOND hub appears to be down. Check if the IP is correct."
+	}
+	catch (Exception e)
 	{
 		checkHttpResponse("executeAction", e.getResponse())
 	}
@@ -1305,7 +1322,11 @@ def executeAction(bondId, action, argument) {
 			isSuccessful = checkHttpResponse("executeAction", resp)
 		}
 	}
-	catch (e) 
+	catch (org.apache.http.conn.ConnectTimeoutException e)
+	{
+		log.error "executeAction: connection to BOND hub appears to be down. Check if the IP is correct."
+	}
+	catch (Exception e) 
 	{
 		checkHttpResponse("executeAction", e.getResponse())
 	}
@@ -1328,7 +1349,11 @@ def executeFixState(bondId, body) {
 			isSuccessful = checkHttpResponse("executeFixState", resp)
 		}
 	}
-	catch (e) 
+	catch (org.apache.http.conn.ConnectTimeoutException e)
+	{
+		log.error "executeFixState: connection to BOND hub appears to be down. Check if the IP is correct."
+	}
+	catch (Exception e) 
 	{
 		checkHttpResponse("executeFixState", e.getResponse())
 	}
@@ -1376,4 +1401,16 @@ def checkHttpResponse(action, resp) {
 		log.error "${action}: unexpected HTTP response: ${resp.status}"
 		return false
 	}
+}
+
+def displayFooter(){
+	section() {
+		paragraph getFormat("line")
+		paragraph "<div style='color:#1A77C9;text-align:center'>BOND Home Integration<br><a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7LBRPJRLJSDDN&source=url' target='_blank'><img src='https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_37x23.jpg' border='0' alt='PayPal Logo'></a><br><br>Please consider donating. This app took a lot of work to make.<br>If you find it valuable, I'd certainly appreciate it!</div>"
+	}       
+}
+
+def getFormat(type, myText=""){			// Modified from @Stephack Code   
+    if(type == "line") return "<hr style='background-color:#1A77C9; height: 1px; border: 0;'>"
+    if(type == "title") return "<h2 style='color:#1A77C9;font-weight: bold'>${myText}</h2>"
 }

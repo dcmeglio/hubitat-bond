@@ -1393,7 +1393,7 @@ def checkHttpResponse(action, resp) {
 		return true
 	else if (resp.status == 400 || resp.status == 401 || resp.status == 404 || resp.status == 409 || resp.status == 500)
 	{
-		log.error "${action}: ${resp.getData()}"
+		log.error "${action}: $[resp.status} - ${resp.getData()}"
 		return false
 	}
 	else

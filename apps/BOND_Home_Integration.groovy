@@ -6,14 +6,15 @@
  *  Copyright 2019-2020 Dominick Meglio
  *
  * Revision History
- * v 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
- * v 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
- * v 2019.12.14 - Added support for Switch capability to the motorized shades for compatibility
- * v 2020.01.02 - Fixed an issue where fan speed wouldn't be set properly (thanks jchurch for the troubleshooting!)
- * v 2020.02.01 - Fixed an issue where looking for devices was incorrect which broke Smart By BOND devices (thanks mcneillk for the fix!)
- * v 2020.03.23 - Added the ability to fix device state when it's out of sync (thanks stephen_nutt for the suggestion)
- * v 2020.04.13 - Added a stop command to motorized shades to stop an open/close at the current position (suggested by jchurch)
- * v 2020.04.21 - Added better logging for connection issues to the hub
+ * 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
+ * 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
+ * 2019.12.14 - Added support for Switch capability to the motorized shades for compatibility
+ * 2020.01.02 - Fixed an issue where fan speed wouldn't be set properly (thanks jchurch for the troubleshooting!)
+ * 2020.02.01 - Fixed an issue where looking for devices was incorrect which broke Smart By BOND devices (thanks mcneillk for the fix!)
+ * 2020.03.23 - Added the ability to fix device state when it's out of sync (thanks stephen_nutt for the suggestion)
+ * 2020.04.13 - Added a stop command to motorized shades to stop an open/close at the current position (suggested by jchurch)
+ * 2020.04.21 - Added better logging for connection issues to the hub
+ * 2020.05.04 - Error logging improvements
  *
  */
 
@@ -467,6 +468,8 @@ def powerMeterEventHandler(evt) {
 def updateDevices() {
     for (fan in fans) {
         def deviceState = getState(fan)
+		if (deviceState == null)
+			continue
         def device = getChildDevice("bond:" + fan)
         def deviceLight = device.getChildDevice("bond:" + fan + ":light")
 		def deviceUpLight = device.getChildDevice("bond:" + fan + ":uplight")
@@ -546,6 +549,8 @@ def updateDevices() {
 		for (def i = 0; i < fireplaces.size(); i++)
 		{
 			def deviceState = getState(fireplaces[i])
+			if (deviceState == null)
+				continue
 			def device = getChildDevice("bond:" + fireplaces[i])
 			def deviceFan = device.getChildDevice("bond:" + fireplaces[i] + ":fan")
 			def deviceLight = device.getChildDevice("bond:" + fireplaces[i] + ":light")
@@ -607,6 +612,8 @@ def updateDevices() {
 		for (shade in shades)
 		{
 			def deviceState = getState(shade)
+			if (deviceState == null)
+				continue
 			def device = getChildDevice("bond:" + shade)
 			
 			if (deviceState.open == 1)
@@ -627,6 +634,8 @@ def updateDevices() {
 		for (generic in genericDevices)
 		{
 			def deviceState = getState(generic)
+			if (deviceState == null)
+				continue
 			def device = getChildDevice("bond:" + generic)
 			
 			if (deviceState.power > 0)
@@ -1231,6 +1240,9 @@ def getState(bondId) {
 				stateToReturn = resp.data
 		}
 	}
+	catch (java.net.NoRouteToHostException e) {
+		log.error "getState: connection to BOND hub appears to be down. Check if the IP is correct."
+	}
 	catch (org.apache.http.conn.ConnectTimeoutException e)
 	{
 		log.error "getState: connection to BOND hub appears to be down. Check if the IP is correct."
@@ -1268,6 +1280,9 @@ def hasAction(bondId, commandType) {
 			}
 		}
 	}
+	catch (java.net.NoRouteToHostException e) {
+		log.error "executeFixState: connection to BOND hub appears to be down. Check if the IP is correct."
+	}
 	catch (org.apache.http.conn.ConnectTimeoutException e)
 	{
 		log.error "hasAction: connection to BOND hub appears to be down. Check if the IP is correct."
@@ -1294,6 +1309,9 @@ def executeAction(bondId, action) {
 		httpPut(params) { resp ->
 			isSuccessful = checkHttpResponse("executeAction", resp)
 		}
+	}
+	catch (java.net.NoRouteToHostException e) {
+		log.error "executeAction: connection to BOND hub appears to be down. Check if the IP is correct."
 	}
 	catch (org.apache.http.conn.ConnectTimeoutException e)
 	{
@@ -1322,6 +1340,9 @@ def executeAction(bondId, action, argument) {
 			isSuccessful = checkHttpResponse("executeAction", resp)
 		}
 	}
+	catch (java.net.NoRouteToHostException e) {
+		log.error "executeAction: connection to BOND hub appears to be down. Check if the IP is correct."
+	}
 	catch (org.apache.http.conn.ConnectTimeoutException e)
 	{
 		log.error "executeAction: connection to BOND hub appears to be down. Check if the IP is correct."
@@ -1348,6 +1369,9 @@ def executeFixState(bondId, body) {
 		httpPatch(params) { resp ->
 			isSuccessful = checkHttpResponse("executeFixState", resp)
 		}
+	}
+	catch (java.net.NoRouteToHostException e) {
+		log.error "executeFixState: connection to BOND hub appears to be down. Check if the IP is correct."
 	}
 	catch (org.apache.http.conn.ConnectTimeoutException e)
 	{

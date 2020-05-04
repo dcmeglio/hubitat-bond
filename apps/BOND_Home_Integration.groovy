@@ -41,6 +41,7 @@ def prefHub() {
 		section("Hub Information"){
 			input("hubIp", "text", title: "BOND Hub IP", description: "BOND Hub IP Address")
 			input("hubToken", "text", title: "BOND Hub Token", description: "BOND Hub Token")
+			input("refreshInterval", "number", title: "Poll BOND Home every N seconds", required: true, defaultValue: 30)
             input("debugOutput", "bool", title: "Enable debug logging?", defaultValue: true, displayDuringSetup: false, required: false)
 		}
 		displayFooter()
@@ -121,7 +122,9 @@ def initialize() {
 	cleanupChildDevices()
 	createChildDevices()
 	subscribeSensorEvents()	
-    schedule("0/30 * * * * ? *", updateDevices)
+	
+	def refreshEvery = refreshInterval ?: 30
+    schedule("0/${refreshEvery} * * * * ? *", updateDevices)
 }
 
 def getDevices() {

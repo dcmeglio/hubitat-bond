@@ -39,8 +39,8 @@ preferences {
 def prefHub() {
 	return dynamicPage(name: "prefHub", title: "Connect to BOND", nextPage:"prefListDevices", uninstall:false, install: false) {
 		section("Hub Information"){
-			input("hubIp", "text", title: "BOND Hub IP", description: "BOND Hub IP Address")
-			input("hubToken", "text", title: "BOND Hub Token", description: "BOND Hub Token")
+			input("hubIp", "text", title: "BOND Hub IP", description: "BOND Hub IP Address", required: true)
+			input("hubToken", "text", title: "BOND Hub Token", description: "BOND Hub Token", required: true)
 			input("refreshInterval", "number", title: "Poll BOND Home every N seconds", required: true, defaultValue: 30)
             input("debugOutput", "bool", title: "Enable debug logging?", defaultValue: true, displayDuringSetup: false, required: false)
 		}

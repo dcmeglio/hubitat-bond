@@ -39,7 +39,7 @@ def off() {
 }
 
 def toggle() {
-	if (device.currentState("windowShade") == "open")
+	if (device.currentValue("windowShade") == "open")
 		close()
 	else
 		open()

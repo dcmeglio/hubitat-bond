@@ -37,7 +37,7 @@ def off() {
 }
 
 def toggle() {
-	if (device.currentState("switch") == "on")
+	if (device.currentValue("switch") == "on")
 		off()
 	else
 		on()

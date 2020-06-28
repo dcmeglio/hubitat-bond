@@ -17,16 +17,17 @@ metadata {
 		
         command "stop"
         command "fixShade", [[name:"Shade*", type: "ENUM", description: "Shade", constraints: ["open","close"] ] ]
+		command "toggle"
 		
     }
 }
 
 def open() {
-	parent.handleOpen(device, device.deviceNetworkId.split(":")[1])
+	parent.handleOpen(device)
 }
 
 def close() {
-	parent.handleClose(device, device.deviceNetworkId.split(":")[1])
+	parent.handleClose(device)
 }
 
 def on() {
@@ -37,11 +38,18 @@ def off() {
 	close()
 }
 
+def toggle() {
+	if (device.currentState("windowShade") == "open")
+		close()
+	else
+		open()
+}
+
 def stop() {
-	parent.handleStop(device, device.deviceNetworkId.split(":")[1])
+	parent.handleStop(device)
 }
 
 def fixShade(shade) {
-	parent.fixShadeState(device, device.deviceNetworkId.split(":")[1], shade)
+	parent.fixShadeState(device, shade)
 }
 

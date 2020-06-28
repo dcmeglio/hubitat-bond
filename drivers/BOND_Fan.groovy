@@ -17,19 +17,27 @@ metadata {
 		
 		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
 		command "fixSpeed", [[name:"Speed*", type: "ENUM", description: "Speed", constraints: ["off","low", "medium-low", "medium", "medium-high", "high", "on"] ] ]
+		command "toggle"
     }
 }
 
 def on() {
-	parent.handleOn(device, device.deviceNetworkId.split(":")[1])
+	parent.handleOn(device)
 	if (state.lastSpeed != null)
 	{
-		parent.handleFanSpeed(device, device.deviceNetworkId.split(":")[1], state.lastSpeed)
+		parent.handleFanSpeed(device, state.lastSpeed)
 	}
 }
 
 def off() {
-	parent.handleOff(device, device.deviceNetworkId.split(":")[1])
+	parent.handleOff(device)
+}
+
+def toggle() {
+	if (device.currentState("switch") == "on")
+		off()
+	else
+		on()
 }
 
 def handleLightOn(device, id) {
@@ -43,7 +51,7 @@ def handleLightOff(device, id) {
 def setSpeed(speed) {
 	if (speed != "off" && speed != "on")
 		state.lastSpeed = speed
-    parent.handleFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
+    parent.handleFanSpeed(device, speed)
 }
 
 def handleLightLevel(device, id, level)
@@ -64,11 +72,11 @@ def handleStopDimming(device, bondId) {
 }
 
 def fixPower(power) {
-	parent.fixPowerState(device, device.deviceNetworkId.split(":")[1], power)
+	parent.fixPowerState(device, power)
 }
 
 def fixSpeed(speed) {
-	parent.fixFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
+	parent.fixFanSpeed(device, speed)
 }
 
 def fixLightPower(device, bondId, power) {

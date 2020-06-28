@@ -21,27 +21,35 @@ metadata {
 		command "stopDimming"
 		
 		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
+		command "toggle"
     }
 }
 
 def dim(duration) {
-	parent.handleDim(device, device.deviceNetworkId.split(":")[1], duration)
+	parent.handleDim(device, duration)
 }
 
 def startDimming() {
-	parent.handleStartDimming(device, device.deviceNetworkId.split(":")[1])
+	parent.handleStartDimming(device)
 }
 
 def stopDimming() {
-	parent.handleStopDimming(device, device.deviceNetworkId.split(":")[1])
+	parent.handleStopDimming(device)
 }
 
 def on() {
-	parent.handleLightOn(device, device.deviceNetworkId.split(":")[1])
+	parent.handleLightOn(device)
 }
 
 def off() {
-    parent.handleLightOff(device, device.deviceNetworkId.split(":")[1])
+    parent.handleLightOff(device)
+}
+
+def toggle() {
+	if (device.currentState("switch") == "on")
+		off()
+	else
+		on()
 }
 
 def installed() {
@@ -53,5 +61,5 @@ def updated() {
 }
 
 def fixPower(power) {
-	parent.fixLightPower(device, device.deviceNetworkId.split(":")[1], power)
+	parent.fixLightPower(device, power)
 }

@@ -19,19 +19,27 @@ metadata {
 		
 		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
 		command "fixFlame", [[name:"Height*", type: "ENUM", description: "Flame height", constraints: ["off","low","medium", "high"] ] ]
+		command "toggle"
     }
 }
 
 def on() {
-	parent.handleOn(device, device.deviceNetworkId.split(":")[1])
+	parent.handleOn(device)
 }
 
 def off() {
-	parent.handleOff(device, device.deviceNetworkId.split(":")[1])
+	parent.handleOff(device)
+}
+
+def toggle() {
+	if (device.currentState("switch") == "on")
+		off()
+	else
+		on()
 }
 
 def setFlame(height) {
-	parent.handleSetFlame(device, device.deviceNetworkId.split(":")[1], height)
+	parent.handleSetFlame(device, height)
 }
 
 def handleLightOn(device, id) {
@@ -55,24 +63,24 @@ def handleFPFanOff(device, id) {
 }
 
 def fixPower(power) {
-	parent.fixPowerState(device, device.deviceNetworkId.split(":")[1], power)
+	parent.fixPowerState(device, power)
 }
 
 def fixFlame(flame) {
-	parent.fixFlameState(device, device.deviceNetworkId.split(":")[1], flame)
+	parent.fixFlameState(device, flame)
 }
 
 def fixFPFanPower(device, id, state)
 {
-	parent.fixFPFanPower(device, device.deviceNetworkId.split(":")[1], state)
+	parent.fixFPFanPower(device, state)
 }
 
 def fixFPFanSpeed(device, id, state)
 {
-	parent.fixFPFanSpeed(device, device.deviceNetworkId.split(":")[1], state)
+	parent.fixFPFanSpeed(device, state)
 }
 
 def fixLightPower(device, id, state)
 {
-	parent.fixLightPower(device, device.deviceNetworkId.split(":")[1], state)
+	parent.fixLightPower(device, state)
 }

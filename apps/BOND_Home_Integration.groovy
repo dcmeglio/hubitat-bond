@@ -15,6 +15,7 @@
  * 2020.04.13 - Added a stop command to motorized shades to stop an open/close at the current position (suggested by jchurch)
  * 2020.04.21 - Added better logging for connection issues to the hub
  * 2020.05.04 - Error logging improvements
+ * 2020.06.28 - Added toggle command to all devices (suggested by jchurch) and support for having multiple Smart by BOND devices (discovered by jhciotti)
  *
  */
 
@@ -279,6 +280,13 @@ def findComponentDevice(dev, deviceId) {
 		return component
 
 	return component?.getChildDevice(hubId + ":bond:" + deviceId) ?: null
+}
+
+def getBondIdFromDevice(device) {
+	if (device?.deviceNetworkId.startsWith("bond:"))
+		return device?.deviceNetworkId.split(":")[1]
+	else
+		return device?.deviceNetworkId.split(":")[2]
 }
 
 def deleteComponentDevice(dev, deviceId) {
@@ -710,7 +718,8 @@ def updateDevices() {
 	}
 }
 
-def handleOn(device, bondId) {
+def handleOn(device) {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling On event for ${bondId}"
 
     if (executeAction(bondId, "TurnOn") && shouldSendEvent(bondId))
@@ -720,7 +729,8 @@ def handleOn(device, bondId) {
 	
 }
 
-def handleLightOn(device, bondId) {
+def handleLightOn(device) {
+	def bondId = getBondIdFromDevice(device)
     logDebug "Handling Light On event for ${bondId}"
 	if (device.deviceNetworkId.contains("uplight"))
 	{
@@ -745,7 +755,8 @@ def handleLightOn(device, bondId) {
     }
 }
 
-def handleLightOff(device, bondId) {
+def handleLightOff(device) {
+	def bondId = getBondIdFromDevice(device)
     logDebug "Handling Light Off event for ${bondId}"   
 	if (device.deviceNetworkId.contains("uplight"))
 	{
@@ -770,8 +781,9 @@ def handleLightOff(device, bondId) {
     }
 }
 
-def handleDim(device, bondId, duration)
+def handleDim(device, duration)
 {
+	def bondId = getBondIdFromDevice(device)
 	if (device.deviceNetworkId.contains("uplight"))
 	{
 		dimUsingTimer(device, bondId, duration, "StartUpLightDimmer")
@@ -786,8 +798,9 @@ def handleDim(device, bondId, duration)
 	}
 }
 
-def dimUsingTimer(device, bondId, duration, command)
+def dimUsingTimer(device, duration, command)
 {
+	def bondId = getBondIdFromDevice(device)
 	if (executeAction(bondId, command))
 	{
 		runInMillis((duration*1000).toInteger(), stopDimmer, [data: [device: device, bondId: bondId]])
@@ -799,8 +812,9 @@ def stopDimmer(data)
 	executeAction(data.bondId, "Stop")
 }
 
-def handleStartDimming(device, bondId)
+def handleStartDimming(device)
 {
+	def bondId = getBondIdFromDevice(device)
 	if (device.deviceNetworkId.contains("uplight"))
 	{
 		executeAction(bondId, "StartUpLightDimmer")
@@ -815,12 +829,14 @@ def handleStartDimming(device, bondId)
 	}
 }
 
-def handleStopDimming(device, bondId)
+def handleStopDimming(device)
 {
+	def bondId = getBondIdFromDevice(device)
 	executeAction(bondId, "Stop")
 }
 
-def handleLightLevel(device, bondId, level) {
+def handleLightLevel(device, level) {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling Light Level event for ${bondId}"
 	if (device.deviceNetworkId.contains("uplight"))
 	{
@@ -845,8 +861,9 @@ def handleLightLevel(device, bondId, level) {
     }
 }
 
-def handleSetFlame(device, bondId, height)
+def handleSetFlame(device, height)
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling Flame event for ${bondId}"
 	
 	if (height == "off")
@@ -871,8 +888,9 @@ def handleSetFlame(device, bondId, height)
 	}
 }
 
-def handleOpen(device, bondId)
+def handleOpen(device)
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling Open event for ${bondId}"
 	
     if (executeAction(bondId, "Open")) 
@@ -881,8 +899,9 @@ def handleOpen(device, bondId)
     }
 }
 
-def handleClose(device, bondId)
+def handleClose(device)
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling Close event for ${bondId}"
 	
     if (executeAction(bondId, "Close")) 
@@ -891,15 +910,17 @@ def handleClose(device, bondId)
     }
 }
 
-def handleStop(device, bondId)
+def handleStop(device)
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling Stop event for ${bondId}"
 	
     executeAction(bondId, "Hold")
 }
 
-def fixPowerState(device, bondId, state) 
+def fixPowerState(device, state) 
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Setting power state for ${bondId} to ${state}"
 	
 	def power
@@ -923,8 +944,9 @@ def fixPowerState(device, bondId, state)
     }
 }
 
-def fixFlameState(device, bondId, state) 
+def fixFlameState(device, state) 
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Setting flame state for ${bondId} to ${state}"
 	
 	def flameHeight = 0
@@ -941,8 +963,9 @@ def fixFlameState(device, bondId, state)
     }
 }
 
-def fixFanSpeed(device, bondId, fanState) 
+def fixFanSpeed(device, fanState) 
 {
+	def bondId = getBondIdFromDevice(device)
 	def speed = translateHEFanSpeedToBond(bondId, state.fanProperties?.getAt(bondId)?.max_speed ?: 3, fanState)
 	logDebug "Setting fan speed for ${bondId} to ${fanState}"
 
@@ -962,8 +985,9 @@ def fixFanSpeed(device, bondId, fanState)
     }
 }
 
-def fixShadeState(device, bondId, state) 
+def fixShadeState(device, state) 
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Setting shade state for ${bondId} to ${state}"
 
 	def open
@@ -987,8 +1011,9 @@ def fixShadeState(device, bondId, state)
     }
 }
 
-def fixDirection(device, bondId, state) 
+def fixDirection(device, state) 
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Setting direction state for ${bondId} to ${state}"
 
 	def direction
@@ -1010,8 +1035,9 @@ def fixDirection(device, bondId, state)
     }
 }
 
-def fixFPFanPower(device, bondId, state) 
+def fixFPFanPower(device, state) 
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Setting FP fan power state for ${bondId} to ${state}"
 
 	def fppower
@@ -1035,8 +1061,9 @@ def fixFPFanPower(device, bondId, state)
     }
 }
 
-def fixFPFanSpeed(device, bondId, fanState) 
+def fixFPFanSpeed(device, fanState) 
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Setting FP fan speed state for ${bondId} to ${fanState}"
 	
 	def speed = translateHEFanSpeedToBond(bondId, state.fireplaceProperties?.getAt(bondId)?.max_speed ?: 3, fanState)
@@ -1059,7 +1086,8 @@ def fixFPFanSpeed(device, bondId, fanState)
     }
 }
 
-def fixLightPower(device, bondId, state) {
+def fixLightPower(device, state) {
+	def bondId = getBondIdFromDevice(device)
     logDebug "Setting light state for ${bondId} to ${state}"
 	
 	def power
@@ -1091,7 +1119,8 @@ def fixLightPower(device, bondId, state) {
     }
 }
 
-def fixLightLevel(device, bondId, state) {
+def fixLightLevel(device, state) {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Setting light level for ${bondId} to ${state}"
 	
 	if (device.deviceNetworkId.contains("uplight"))
@@ -1191,7 +1220,8 @@ def translateHEFanSpeedToBond(id, max_speeds, speed)
 	return speedTranslations[max_speeds][speed]
 }
 
-def handleFanSpeed(device, bondId, speed) {
+def handleFanSpeed(device, speed) {
+	def bondId = getBondIdFromDevice(device)
     logDebug "Handling Fan Speed event for ${bondId}"
 
 	if (speed == "off")
@@ -1213,7 +1243,8 @@ def handleFanSpeed(device, bondId, speed) {
     }
 }
 
-def handleFPFanSpeed(device, bondId, speed) {
+def handleFPFanSpeed(device, speed) {
+	def bondId = getBondIdFromDevice(device)
     logDebug "Handling Fireplace Fan Speed event for ${bondId}"
 
 	if (speed == "off")	
@@ -1229,7 +1260,8 @@ def handleFPFanSpeed(device, bondId, speed) {
     }
 }
 
-def handleFPFanOn(device, bondId) {
+def handleFPFanOn(device) {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling Fan On event for ${bondId}"
 	
     if (executeAction(bondId, "TurnFpFanOn")) 
@@ -1242,7 +1274,8 @@ def handleFPFanOn(device, bondId) {
 	return false
 }
 
-def handleFPFanOff(device, bondId) {
+def handleFPFanOff(device) {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling Fan Off event for ${bondId}"
 	
 	
@@ -1256,10 +1289,10 @@ def handleFPFanOff(device, bondId) {
 	return false
 }
 
-def handleOff(device, bondId) {
+def handleOff(device) {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling Off event for ${bondId}"
 
-	
     if (executeAction(bondId, "TurnOff") && shouldSendEvent(bondId)) 
     {
         device.sendEvent(name: "switch", value: "off")

@@ -17,25 +17,33 @@ metadata {
 		
 		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
 		command "fixSpeed", [[name:"Speed*", type: "ENUM", description: "Speed", constraints: ["off","low", "medium-low", "medium", "medium-high", "high", "on"] ] ]
+		command "toggle"
     }
 }
 
 def setSpeed(speed) {
-    parent.handleFPFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
+    parent.handleFPFanSpeed(device, speed)
 }
 
 def on() {
-	parent.handleFPFanOn(device, device.deviceNetworkId.split(":")[1])
+	parent.handleFPFanOn(device)
 }
 
 def off () {
-	parent.handleFPFanOff(device, device.deviceNetworkId.split(":")[1])
+	parent.handleFPFanOff(device)
+}
+
+def toggle() {
+	if (device.currentState("switch") == "on")
+		off()
+	else
+		on()
 }
 
 def fixPower(power) {
-	parent.fixFPFanPower(device, device.deviceNetworkId.split(":")[1], power)
+	parent.fixFPFanPower(device, power)
 }
 
 def fixSpeed(speed) {
-	parent.fixFPFanSpeed(device, device.deviceNetworkId.split(":")[1], speed)
+	parent.fixFPFanSpeed(device, speed)
 }

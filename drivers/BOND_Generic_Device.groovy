@@ -14,17 +14,25 @@ metadata {
 	) {
 		capability "Switch"
 		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
+		command "toggle"
     }
 }
 
 def on() {
-	parent.handleOn(device, device.deviceNetworkId.split(":")[1])
+	parent.handleOn(device)
 }
 
 def off() {
-	parent.handleOff(device, device.deviceNetworkId.split(":")[1])
+	parent.handleOff(device)
+}
+
+def toggle() {
+	if (device.currentState("switch") == "on")
+		off()
+	else
+		on()
 }
 
 def fixPower(power) {
-	parent.fixPowerState(device, device.deviceNetworkId.split(":")[1], power)
+	parent.fixPowerState(device, power)
 }

@@ -18,28 +18,36 @@ metadata {
 		
 		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
 		command "fixLevel", [[name:"Level*", type: "NUMBER", description: "Level"]]
+		command "toggle"
     }
 }
 
 def setLevel(level, duration) {
-	parent.handleLightLevel(device, device.deviceNetworkId.split(":")[1], level)
+	parent.handleLightLevel(device, level)
 }
 def setLevel(level) {
-	parent.handleLightLevel(device, device.deviceNetworkId.split(":")[1], level)
+	parent.handleLightLevel(device, level)
 }
 
 def on() {
-	parent.handleLightOn(device, device.deviceNetworkId.split(":")[1])
+	parent.handleLightOn(device)
 }
 
 def off() {
-    parent.handleLightOff(device, device.deviceNetworkId.split(":")[1])
+    parent.handleLightOff(device)
+}
+
+def toggle() {
+	if (device.currentState("switch") == "on")
+		off()
+	else
+		on()
 }
 
 def fixPower(power) {
-	parent.fixLightPower(device, device.deviceNetworkId.split(":")[1], power)
+	parent.fixLightPower(device, power)
 }
 
 def fixLevel(power) {
-	parent.fixLightLevel(device, device.deviceNetworkId.split(":")[1], power)
+	parent.fixLightLevel(device, power)
 }

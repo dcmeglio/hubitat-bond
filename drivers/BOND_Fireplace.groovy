@@ -42,24 +42,24 @@ def setFlame(height) {
 	parent.handleSetFlame(device, height)
 }
 
-def handleLightOn(device, id) {
-    parent.handleLightOn(device, id)
+def handleLightOn(device) {
+    parent.handleLightOn(device)
 }
 
-def handleLightOff(device, id) {
-    parent.handleLightOff(device, id)
+def handleLightOff(device) {
+    parent.handleLightOff(device)
 }
 
-def handleFPFanSpeed(device, id, speed) {
-    parent.handleFPFanSpeed(device, id, speed)
+def handleFPFanSpeed(device, speed) {
+    parent.handleFPFanSpeed(device, speed)
 }
     
-def handleFPFanOn(device, id) {
-    parent.handleFPFanOn(device, id)
+def handleFPFanOn(device) {
+    parent.handleFPFanOn(device)
 }
 
-def handleFPFanOff(device, id) {
-    parent.handleFPFanOff(device, id)
+def handleFPFanOff(device) {
+    parent.handleFPFanOff(device)
 }
 
 def fixPower(power) {
@@ -70,17 +70,17 @@ def fixFlame(flame) {
 	parent.fixFlameState(device, flame)
 }
 
-def fixFPFanPower(device, id, state)
+def fixFPFanPower(device, state)
 {
 	parent.fixFPFanPower(device, state)
 }
 
-def fixFPFanSpeed(device, id, state)
+def fixFPFanSpeed(device, state)
 {
 	parent.fixFPFanSpeed(device, state)
 }
 
-def fixLightPower(device, id, state)
+def fixLightPower(device, state)
 {
 	parent.fixLightPower(device, state)
 }

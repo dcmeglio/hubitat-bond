@@ -43,12 +43,12 @@ def toggle() {
 		on()
 }
 
-def handleLightOn(device, id) {
-    parent.handleLightOn(device, id)
+def handleLightOn(device) {
+    parent.handleLightOn(device)
 }
 
-def handleLightOff(device, id) {
-    parent.handleLightOff(device, id)
+def handleLightOff(device) {
+    parent.handleLightOff(device)
 }
 
 def setSpeed(speed) {
@@ -61,21 +61,21 @@ def setDirection(direction) {
 	parent.handleDirection(device, direction)
 }
 
-def handleLightLevel(device, id, level)
+def handleLightLevel(device, level)
 {
-	parent.handleLightLevel(device, id, level)
+	parent.handleLightLevel(device, level)
 }
 
-def handleDim(device, bondId, duration) {
-	parent.handleDim(device, bondId, duration)
+def handleDim(device, duration) {
+	parent.handleDim(device, duration)
 }
 
-def handleStartDimming(device, bondId) {
-	parent.handleStartDimming(device, bondId)
+def handleStartDimming(device) {
+	parent.handleStartDimming(device)
 }
 
-def handleStopDimming(device, bondId) {
-	parent.handleStopDimming(device, bondId)
+def handleStopDimming(device) {
+	parent.handleStopDimming(device)
 }
 
 def fixPower(power) {
@@ -90,10 +90,10 @@ def fixDirection(direction) {
 	parent.fixDirection(device, direction)
 }
 
-def fixLightPower(device, bondId, power) {
-	parent.fixLightPower(device, bondId, power)
+def fixLightPower(device, power) {
+	parent.fixLightPower(device, power)
 }
 
-def fixLightLevel(device, bondId, level) {
-	parent.fixLightLevel(device, bondId, level)
+def fixLightLevel(device, level) {
+	parent.fixLightLevel(device, level)
 }

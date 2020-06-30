@@ -291,9 +291,9 @@ def getBondIdFromDevice(device) {
 
 def deleteComponentDevice(dev, deviceId) {
 	def hubId = getHubId()
-	if (dev.findChildDevice("bond:" + deviceId + ":fan"))
+	if (dev.getChildDevice("bond:" + deviceId + ":fan"))
 		dev.deleteChildDevice("bond:" + deviceId + ":fan")
-	if (dev.findChildDevice(hubId + ":bond:" + deviceId + ":fan"))
+	if (dev.getChildDevice(hubId + ":bond:" + deviceId + ":fan"))
 		dev.deleteChildDevice(hubId + ":bond:" + deviceId + ":fan")
 }
 

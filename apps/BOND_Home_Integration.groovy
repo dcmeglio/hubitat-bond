@@ -868,7 +868,7 @@ def handleSetFlame(device, height)
 	
 	if (height == "off")
 	{
-		if (handleOff(device, bondId))
+		if (handleOff(device))
 			device.sendEvent(name: "flame", value: "off")
 	}
 	else 
@@ -1226,13 +1226,13 @@ def handleFanSpeed(device, speed) {
 
 	if (speed == "off")
 	{
-		if (handleOff(device, bondId))
+		if (handleOff(device))
 		{
 			device.sendEvent(name: "speed", value: "off")
 		}
 	}	
 	else if (speed == "on")
-		handleOn(device, bondId)
+		handleOn(device)
     else
 	{
         if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(bondId, state.fanProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 
@@ -1248,9 +1248,9 @@ def handleFPFanSpeed(device, speed) {
     logDebug "Handling Fireplace Fan Speed event for ${bondId}"
 
 	if (speed == "off")	
-		handleFPFanOff(device, bondId)
+		handleFPFanOff(device)
 	else if (speed == "on")
-		handleFPFanOn(device, bondId)
+		handleFPFanOn(device)
     else
 	{
         if (executeAction(bondId, "SetSpeed", translateHEFanSpeedToBond(bondId, state.fireplaceProperties?.getAt(bondId)?.max_speed ?: 3, speed))) 

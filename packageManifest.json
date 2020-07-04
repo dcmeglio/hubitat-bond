@@ -13,7 +13,8 @@
 			"name": "BOND Home Integration",
 			"namespace": "dcm.bond",
 			"location": "https://raw.githubusercontent.com/dcmeglio/hubitat-bond/master/apps/BOND_Home_Integration.groovy",
-			"required": true
+			"required": true,
+			"primary": true
 		}
 	],
 	"drivers" : [

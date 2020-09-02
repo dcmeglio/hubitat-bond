@@ -1304,8 +1304,9 @@ def handleOff(device) {
 	return false
 }
 
-def handleDirection(device, bondId, direction)
+def handleDirection(device, direction)
 {
+	def bondId = getBondIdFromDevice(device)
 	logDebug "Handling Direction event for ${bondId}"
 
     def bondDirection = 1

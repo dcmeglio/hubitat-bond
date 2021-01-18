@@ -6,6 +6,7 @@
  *  Copyright 2019-2020 Dominick Meglio
  *
  * Revision History
+ * 2020.01.18 - Added setPosition support for motorized shades, mapping a special value of 50 to the Preset command
  * 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
  * 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
  * 2019.12.14 - Added support for Switch capability to the motorized shades for compatibility
@@ -916,6 +917,14 @@ def handleStop(device)
 	logDebug "Handling Stop event for ${bondId}"
 	
     executeAction(bondId, "Hold")
+}
+
+def handlePreset(device)
+{
+	def bondId = getBondIdFromDevice(device)
+	logDebug "Handling Preset event for ${bondId}"
+	
+    executeAction(bondId, "Preset")
 }
 
 def fixPowerState(device, state) 

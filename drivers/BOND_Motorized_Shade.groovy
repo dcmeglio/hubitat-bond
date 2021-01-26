@@ -53,3 +53,17 @@ def fixShade(shade) {
 	parent.fixShadeState(device, shade)
 }
 
+def setPosition(Number position) {
+    if (position == 0) {
+        log.info "position special value 0 is set, trigger CLose command"
+        close()
+    } else if (position == 50) {
+        log.info "position special value 50 is set, triggering Preset command"
+        parent.handlePreset(device)
+    } else if (position == 100) {
+        log.info "position special value 100 is set, triggering Open command"
+        open()
+    } else {
+        log.info "no-op for position value " + position + ", set position to 50 to trigger Preset command"
+    }
+}

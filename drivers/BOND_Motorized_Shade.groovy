@@ -55,7 +55,7 @@ def fixShade(shade) {
 
 def setPosition(Number position) {
     if (position == 0) {
-        log.info "position special value 0 is set, trigger CLose command"
+        log.info "position special value 0 is set, triggering Close command"
         close()
     } else if (position == 50) {
         log.info "position special value 50 is set, triggering Preset command"

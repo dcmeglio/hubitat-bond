@@ -1,4 +1,4 @@
-/**
+​/**
  *  BOND Fan
  *
  *  Copyright 2019-2020 Dominick Meglio
@@ -18,6 +18,7 @@ metadata {
 		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
 		command "fixSpeed", [[name:"Speed*", type: "ENUM", description: "Speed", constraints: ["off","low", "medium-low", "medium", "medium-high", "high", "on"] ] ]
 		command "toggle"
+        command "cycleSpeed"
     }
 }
 
@@ -47,7 +48,22 @@ def handleLightOn(device) {
 def handleLightOff(device) {
     parent.handleLightOff(device)
 }
-
+def cycleSpeed(speed) {
+    if(state.lastSpeed == "off")
+        speed = "low"
+    else if(state.lastSpeed == "low")
+        speed = "medium-low"
+    else if(state.lastSpeed == "medium-low")
+        speed = "medium"
+    else if(state.lastSpeed == "medium")
+        speed = "medium-high"
+    else if(state.lastSpeed == "medium-high")
+        speed = "high"
+    else if(state.lastSpeed == "high")
+       speed = "off"
+    state.lastSpeed = speed
+    parent.handleFanSpeed(device, speed)
+}
 def setSpeed(speed) {
 	if (speed != "off" && speed != "on")
 		state.lastSpeed = speed

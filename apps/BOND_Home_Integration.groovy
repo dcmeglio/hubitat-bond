@@ -805,9 +805,8 @@ def handleDim(device, duration)
 	}
 }
 
-def dimUsingTimer(device, duration, command)
+def dimUsingTimer(device, bondId, duration, command)
 {
-	def bondId = getBondIdFromDevice(device)
 	if (executeAction(bondId, command))
 	{
 		runInMillis((duration*1000).toInteger(), stopDimmer, [data: [device: device, bondId: bondId]])

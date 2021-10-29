@@ -14,11 +14,11 @@ metadata {
 	) {
 		capability "Switch"
         capability "Light"
+		capability "ChangeLevel"
 
 		
 		command "dim", ["number"]
 		command "startDimming"
-		command "stopDimming"
 		
 		command "fixPower", [[name:"Power*", type: "ENUM", description: "Power", constraints: ["off","on"] ] ]
 		command "toggle"
@@ -30,10 +30,14 @@ def dim(duration) {
 }
 
 def startDimming() {
-	parent.handleStartDimming(device)
+	parent.handleStartDimming(device, null)
 }
 
-def stopDimming() {
+def startLevelChange(direction) {
+	parent.handleStartDimming(device,direction)
+}
+
+def stopLevelChange() {
 	parent.handleStopDimming(device)
 }
 

@@ -371,8 +371,14 @@ def createChildDevices() {
 					{
 						fanDevice.addChildDevice("bond", "BOND Fan Timer Light", hubId + ":bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
 					}
+					else if (state.fanDetails[fan].contains("StartIncreasingBrightness") && state.fanDetails[fan].contains("StartDecreasingBrightness"))
+					{
+						fanDevice.addChildDevice("bond", "BOND Fan Timer Light", hubId + ":bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
+					}
 					else
+					{
 						fanDevice.addChildDevice("bond", "BOND Fan Light", hubId + ":bond:" + fan + ":light", ["name": state.fanList[fan] + " Light", isComponent: true])
+					}
 				}
 			}
 		}
@@ -813,7 +819,7 @@ def stopDimmer(data)
 	executeAction(data.bondId, "Stop")
 }
 
-def handleStartDimming(device)
+def handleStartDimming(device, direction = null)
 {
 	def bondId = getBondIdFromDevice(device)
 	if (device.deviceNetworkId.contains("uplight"))
@@ -823,6 +829,14 @@ def handleStartDimming(device)
 	else if (device.deviceNetworkId.contains("downlight"))
 	{
 		executeAction(bondId, "StartDownLightDimmer")
+	}
+	else if (direction == 'up') 
+	{
+		executeAction(bondId, "StartIncreasingBrightness")
+	}
+	else if (direction == 'down') 
+	{
+		executeAction(bondId, "StartDecreasingBrightness")
 	}
 	else
 	{

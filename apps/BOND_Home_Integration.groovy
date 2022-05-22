@@ -6,17 +6,18 @@
  *  Copyright 2019-2020 Dominick Meglio
  *
  * Revision History
- * 2020.01.18 - Added setPosition support for motorized shades, mapping a special value of 50 to the Preset command
- * 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
  * 2019.11.24 - Added support for timer based fan light dimmers and flame height adjustment for fireplaces
+ * 2019.12.01 - Fixed an issue where dimmers wouldn't work with fans that support direction controls, fixed an issue setting flame height
  * 2019.12.14 - Added support for Switch capability to the motorized shades for compatibility
  * 2020.01.02 - Fixed an issue where fan speed wouldn't be set properly (thanks jchurch for the troubleshooting!)
+ * 2020.01.18 - Added setPosition support for motorized shades, mapping a special value of 50 to the Preset command
  * 2020.02.01 - Fixed an issue where looking for devices was incorrect which broke Smart By BOND devices (thanks mcneillk for the fix!)
  * 2020.03.23 - Added the ability to fix device state when it's out of sync (thanks stephen_nutt for the suggestion)
  * 2020.04.13 - Added a stop command to motorized shades to stop an open/close at the current position (suggested by jchurch)
  * 2020.04.21 - Added better logging for connection issues to the hub
  * 2020.05.04 - Error logging improvements
  * 2020.06.28 - Added toggle command to all devices (suggested by jchurch) and support for having multiple Smart by BOND devices (discovered by jhciotti)
+ * 2022.05/22 - (matt1097) Improve polling time to cron string conversion logic
  *
  */
 
@@ -39,11 +40,37 @@ preferences {
 }
 
 def prefHub() {
+	def refreshList = [:]
+	refreshList[0] = "Never"
+	refreshList[1] = "1 Second"
+	refreshList[2] = "2 Second"
+	refreshList[3] = "3 Second"
+	refreshList[4] = "4 Second"
+	refreshList[5] = "5 Second"
+	refreshList[6] = "6 Second"
+	refreshList[10] = "10 Second"
+	refreshList[15] = "15 Second"
+	refreshList[20] = "20 Second"
+	refreshList[30] = "30 Second"
+	refreshList[60] = "1 Minute"
+	refreshList[300] = "5 Minute"
+	refreshList[600] = "10 Minute"
+	refreshList[900] = "15 Minute"
+	refreshList[1200] = "20 Minute"
+	refreshList[1800] = "30 Minute"
+	refreshList[3600] = "1 Hour"
+	refreshList[7200] = "2 Hour"
+	refreshList[10800] = "3 Hour"
+	refreshList[14400] = "4 Hour"
+	refreshList[21600] = "6 Hour"
+	refreshList[43200] = "12 Hour"
+	refreshList[86400] = "Daily"
+
 	return dynamicPage(name: "prefHub", title: "Connect to BOND", nextPage:"prefListDevices", uninstall:false, install: false) {
 		section("Hub Information"){
 			input("hubIp", "text", title: "BOND Hub IP", description: "BOND Hub IP Address", required: true)
 			input("hubToken", "text", title: "BOND Hub Token", description: "BOND Hub Token", required: true)
-			input("refreshInterval", "number", title: "Poll BOND Home every N seconds", required: true, defaultValue: 30)
+			input("refreshInterval", "enum", title: "Poll BOND Home every:", required: true, multiple: false, options: refreshList, defaultValue: "5 Minute")
             input("debugOutput", "bool", title: "Enable debug logging?", defaultValue: true, displayDuringSetup: false, required: false)
 		}
 		displayFooter()
@@ -125,8 +152,34 @@ def initialize() {
 	createChildDevices()
 	subscribeSensorEvents()	
 	
-	def refreshEvery = refreshInterval ?: 30
-    schedule("0/${refreshEvery} * * * * ? *", updateDevices)
+	def refreshEvery = (refreshInterval ?: 30) as int
+	if (refreshEvery > 0 ) {
+		def cronStr = calculateCron(refreshEvery)
+    	schedule(cronStr, updateDevices)
+	}
+}
+
+def calculateCron(refreshEvery) {
+	//60 seconds in a minute
+	//3600 seconds in a hour
+	//86400 in a day
+
+	//truncated to a whole minute/hour/day
+	if (refreshEvery < 60) {
+		return "0/${refreshEvery} * * * * ? *"
+	}
+	else if (refreshEvery < 3600) {
+		def mins = refreshEvery.intdiv(60)
+		return "0 0/${mins} * * * ? *"
+	}
+	else if (refreshEvery < 86400) {
+		def hours = refreshEvery.intdiv(3600)
+		return "0 0 0/${hours} * * ? *"
+	}
+	else {
+		//check at 3 am every day, once a day.
+		return "* * 3 1/1 * ? *"
+	}
 }
 
 def getHubId() {

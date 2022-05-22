@@ -2,11 +2,11 @@
 	"packageName": "BOND Home Integration",
 	"minimumHEVersion": "2.1.9",
 	"author": "Dominick Meglio",
-	"version": "1.4.1",
-	"dateReleased": "2021-10-28",
+	"version": "1.4.2",
+	"dateReleased": "2022-05-22",
 	"documentationLink": "https://github.com/dcmeglio/hubitat-bond/blob/master/README.md",
 	"communityLink": "https://community.hubitat.com/t/support-for-bond-hub/19141",
-	"releaseNotes": "Added support for fans with directionally dimmable lights",
+	"releaseNotes": "Fix cron/polling logic",
 	"apps" : [
 		{
 			"id" : "bf7d70fb-1fa9-436f-9cfc-fb8520cda22a",

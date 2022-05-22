@@ -70,8 +70,8 @@ def handleDim(device, duration) {
 	parent.handleDim(device, duration)
 }
 
-def handleStartDimming(device) {
-	parent.handleStartDimming(device)
+def handleStartDimming(device, direction = null) {
+	parent.handleStartDimming(device, direction)
 }
 
 def handleStopDimming(device) {

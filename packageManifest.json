@@ -2,11 +2,11 @@
 	"packageName": "BOND Home Integration",
 	"minimumHEVersion": "2.1.9",
 	"author": "Dominick Meglio",
-	"version": "1.4.0",
-	"dateReleased": "2021-01-25",
+	"version": "1.4.2",
+	"dateReleased": "2022-05-22",
 	"documentationLink": "https://github.com/dcmeglio/hubitat-bond/blob/master/README.md",
 	"communityLink": "https://community.hubitat.com/t/support-for-bond-hub/19141",
-	"releaseNotes": "Added support for the Preset command for shades including a setPosition command that supports 0/50/100 as values.",
+	"releaseNotes": "Fix cron/polling logic",
 	"apps" : [
 		{
 			"id" : "bf7d70fb-1fa9-436f-9cfc-fb8520cda22a",
